@@ -1,28 +1,29 @@
-# Bolt Enhanced SEO Extension v1.1.0
+# Bolt Enhanced SEO Extension v1.1.1
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://bolt.cm)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)](https://php.net)
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-green.svg)](CHANGELOG.md)
 
 Enhanced SEO extension for Bolt CMS 5/6 with **real-time SEO analysis**, comprehensive meta tag management, and Google search preview.
 
-## ✨ What's New in v1.1.0
+## ✨ What's New in v1.1.1
 
-🎯 **Real-time SEO Analyzer** - Get instant feedback as you write!
-- **Live SEO Score (0-100)** with visual circle indicator
-- **10 Automated Checks** running in real-time
-- **Focus Keyphrase Analysis** - Optimize for your target keyword
-- **Smart Suggestions** - Actionable improvements as you type
-- **Content Quality Checks** - Length, density, links analysis
+🎨 **Improved UX** - Cleaner, more intuitive interface!
+- **Progress Bar** at top (instead of sidebar circle)
+- **Inline Indicators** under each field
+- **Single Column Layout** - No more cramped sidebar
+- **Better Content Detection** - Analyzes all content fields
+- **Mobile Optimized** - Perfect on all devices
 
 ## Features
 
-✅ **Real-time SEO Analyzer** ⭐ NEW in v1.1.0
-   - Live scoring (0-100) with color-coded feedback
+✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.1
+   - Progress bar with live scoring (0-100)
+   - Inline analysis under each field
    - 10 comprehensive SEO checks
    - Focus keyphrase optimization
-   - Content analysis & suggestions
+   - Clean, uncluttered interface
    
 ✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types
 ✅ **Google Search Preview** - Real-time SERP preview as you type

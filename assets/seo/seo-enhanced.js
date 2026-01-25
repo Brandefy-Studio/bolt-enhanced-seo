@@ -1,6 +1,6 @@
 /**
- * Enhanced SEO Field Controller with Real-time Analysis
- * v1.1.0
+ * Enhanced SEO Field Controller with Inline Real-time Analysis
+ * v1.1.1 - Improved UX with inline indicators and progress bar
  */
 
 class SeoSnippet {
@@ -24,11 +24,11 @@ class SeoSnippet {
         this.inputs = {
             title: document.querySelector(`[name="${this.container.dataset.fieldTitle}"]`),
             slug: document.querySelector(`[name="${this.container.dataset.fieldSlug}"]`),
-            description: document.querySelector(`[name="${this.container.dataset.fieldDescription}"]`),
-            content: document.querySelector(`[name="${this.container.dataset.fieldContent}"]`) ||
-                    document.querySelector('[name="fields[body]"]') ||
-                    document.querySelector('textarea[name*="body"]')
+            description: document.querySelector(`[name="${this.container.dataset.fieldDescription}"]`)
         };
+
+        // Find all content fields
+        this.contentFields = this.findContentFields();
 
         this.seoFieldsInputs = {
             title: document.querySelector('#seofields-title'),
@@ -47,6 +47,70 @@ class SeoSnippet {
         this.init();
         this.initEvents();
         this.initAnalysis();
+    }
+
+    findContentFields() {
+        const fields = [];
+        
+        // Find all textarea, redactor, and article fields (exclude SEO fields)
+        const selectors = [
+            'textarea:not([id*="seofields"])',
+            '[data-redactor]',
+            'input[type="text"][name*="[body]"]',
+            'textarea[name*="[body]"]',
+            'textarea[name*="[content]"]',
+            'textarea[name*="[text]"]',
+            '.redactor-box textarea',
+            '.editor textarea'
+        ];
+
+        selectors.forEach(selector => {
+            try {
+                document.querySelectorAll(selector).forEach(field => {
+                    // Exclude SEO fields
+                    if (!field.name || (!field.name.includes('[seo]') && !field.id.includes('seofields'))) {
+                        fields.push(field);
+                    }
+                });
+            } catch(e) {
+                // Selector not supported, skip
+            }
+        });
+
+        // Check for CKEditor instances
+        if (typeof CKEDITOR !== 'undefined') {
+            for (let instance in CKEDITOR.instances) {
+                const editor = CKEDITOR.instances[instance];
+                fields.push({
+                    type: 'ckeditor',
+                    instance: editor,
+                    getValue: () => editor.getData(),
+                    addEventListener: (event, callback) => editor.on(event, callback)
+                });
+            }
+        }
+
+        return fields;
+    }
+
+    getContentFromFields() {
+        let content = '';
+        
+        this.contentFields.forEach(field => {
+            try {
+                if (field.getValue) {
+                    content += ' ' + field.getValue();
+                } else if (field.value) {
+                    content += ' ' + field.value;
+                } else if (field.innerHTML) {
+                    content += ' ' + field.innerHTML;
+                }
+            } catch(e) {
+                // Field not accessible
+            }
+        });
+
+        return content;
     }
 
     init() {
@@ -72,11 +136,17 @@ class SeoSnippet {
     initEvents() {
         // Content field events
         if (this.inputs.title) {
-            this.inputs.title.addEventListener('keyup', () => this.changeTarget('title'));
+            this.inputs.title.addEventListener('keyup', () => {
+                this.changeTarget('title');
+                this.runAnalysis();
+            });
         }
 
         if (this.inputs.description) {
-            this.inputs.description.addEventListener('keyup', () => this.changeTarget('description'));
+            this.inputs.description.addEventListener('keyup', () => {
+                this.changeTarget('description');
+                this.runAnalysis();
+            });
         }
 
         if (this.inputs.slug) {
@@ -89,9 +159,17 @@ class SeoSnippet {
             });
         }
 
-        if (this.inputs.content) {
-            this.inputs.content.addEventListener('keyup', () => this.runAnalysis());
-        }
+        // Listen to content fields
+        this.contentFields.forEach(field => {
+            if (field.addEventListener) {
+                if (field.type === 'ckeditor') {
+                    field.addEventListener('change', () => this.runAnalysis());
+                } else {
+                    field.addEventListener('keyup', () => this.runAnalysis());
+                    field.addEventListener('change', () => this.runAnalysis());
+                }
+            }
+        });
 
         // SEO field events
         Object.keys(this.seoFieldsInputs).forEach((key) => {
@@ -111,47 +189,79 @@ class SeoSnippet {
     }
 
     initAnalysis() {
-        // Create analysis UI
-        this.createAnalysisUI();
+        // Create progress bar at top
+        this.createProgressBar();
+        
+        // Create inline indicators
+        this.createInlineIndicators();
         
         // Run initial analysis
-        this.runAnalysis();
+        setTimeout(() => this.runAnalysis(), 500);
         
-        // Auto-run analysis every 2 seconds if content changed
-        setInterval(() => this.runAnalysis(), 2000);
+        // Auto-run analysis every 3 seconds
+        setInterval(() => this.runAnalysis(), 3000);
     }
 
-    createAnalysisUI() {
-        const analysisContainer = document.getElementById('seo-analysis-container');
-        if (!analysisContainer) return;
+    createProgressBar() {
+        const seoFieldSet = document.querySelector('#field-set-seo .form-set-fields');
+        if (!seoFieldSet) return;
 
-        analysisContainer.innerHTML = `
-            <div class="seo-score-panel">
-                <div class="seo-score-circle">
-                    <svg width="120" height="120" viewBox="0 0 120 120">
-                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
-                        <circle id="seo-score-progress" cx="60" cy="60" r="54" fill="none" 
-                                stroke="#4caf50" stroke-width="8" 
-                                stroke-dasharray="339.292" stroke-dashoffset="339.292"
-                                transform="rotate(-90 60 60)" 
-                                style="transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease"/>
-                        <text id="seo-score-text" x="60" y="68" text-anchor="middle" 
-                              font-size="32" font-weight="bold" fill="#333">0</text>
-                    </svg>
-                </div>
-                <div class="seo-score-label">SEO Score</div>
+        const progressBar = document.createElement('div');
+        progressBar.className = 'seo-progress-wrapper';
+        progressBar.innerHTML = `
+            <div class="seo-progress-header">
+                <span class="seo-progress-label">SEO Score</span>
+                <span class="seo-progress-score" id="seo-progress-score">0/100</span>
             </div>
-            
-            <div class="seo-checks-panel">
-                <h4>SEO Analysis</h4>
-                <div id="seo-checks-list" class="seo-checks-list"></div>
+            <div class="seo-progress-bar">
+                <div class="seo-progress-fill" id="seo-progress-fill" style="width: 0%"></div>
             </div>
-            
-            <div class="seo-feedback-panel" id="seo-feedback-panel" style="display:none;">
-                <h4>Improvements</h4>
-                <div id="seo-feedback-list" class="seo-feedback-list"></div>
-            </div>
+            <div class="seo-progress-status" id="seo-progress-status">Start optimizing your content...</div>
         `;
+        
+        seoFieldSet.insertBefore(progressBar, seoFieldSet.firstChild);
+    }
+
+    createInlineIndicators() {
+        // Title indicator
+        const titleHelper = document.querySelector('#field-text-seo-title .form--helper');
+        if (titleHelper) {
+            const indicator = document.createElement('div');
+            indicator.id = 'seo-title-indicator';
+            indicator.className = 'seo-inline-indicator';
+            titleHelper.appendChild(indicator);
+        }
+
+        // Description indicator
+        const descHelper = document.querySelector('#field-text-seo-description .form--helper');
+        if (descHelper) {
+            const indicator = document.createElement('div');
+            indicator.id = 'seo-description-indicator';
+            indicator.className = 'seo-inline-indicator';
+            descHelper.appendChild(indicator);
+        }
+
+        // Keyphrase indicator
+        const keyphraseHelper = document.querySelector('#field-text-seo-keyphrase .form--helper');
+        if (keyphraseHelper) {
+            const indicator = document.createElement('div');
+            indicator.id = 'seo-keyphrase-indicator';
+            indicator.className = 'seo-inline-indicator';
+            keyphraseHelper.appendChild(indicator);
+        }
+
+        // Content analysis section (after snippet)
+        const snippetField = document.querySelector('#field-text-seo-snippet');
+        if (snippetField) {
+            const contentAnalysis = document.createElement('div');
+            contentAnalysis.id = 'seo-content-analysis';
+            contentAnalysis.className = 'seo-content-analysis';
+            contentAnalysis.innerHTML = `
+                <h4 class="seo-section-title">Content Analysis</h4>
+                <div id="seo-content-checks" class="seo-content-checks"></div>
+            `;
+            snippetField.parentNode.insertBefore(contentAnalysis, snippetField.nextSibling);
+        }
     }
 
     runAnalysis() {
@@ -160,7 +270,7 @@ class SeoSnippet {
             description: this.seoFieldsInputs.description?.value || this.inputs.description?.value || '',
             keyphrase: this.seoFieldsInputs.keyphrase?.value || '',
             slug: this.inputs.slug?.value || '',
-            content: this.inputs.content?.value || ''
+            content: this.getContentFromFields()
         };
 
         const results = this.analyzer.analyze(data);
@@ -168,73 +278,123 @@ class SeoSnippet {
     }
 
     updateAnalysisUI(results) {
-        // Update score circle
-        const scoreCircle = document.getElementById('seo-score-progress');
-        const scoreText = document.getElementById('seo-score-text');
-        
-        if (scoreCircle && scoreText) {
-            const circumference = 339.292;
-            const offset = circumference - (results.score / 100) * circumference;
-            scoreCircle.style.strokeDashoffset = offset;
-            
-            // Color based on score
-            if (results.score >= 80) {
-                scoreCircle.style.stroke = '#4caf50'; // Green
-            } else if (results.score >= 50) {
-                scoreCircle.style.stroke = '#ff9800'; // Orange
-            } else {
-                scoreCircle.style.stroke = '#f44336'; // Red
-            }
-            
-            scoreText.textContent = results.score;
-        }
+        this.updateProgressBar(results.score);
+        this.updateTitleIndicator(results.checks.titleLength, results.checks.keyphraseInTitle);
+        this.updateDescriptionIndicator(results.checks.descriptionLength, results.checks.keyphraseInDescription);
+        this.updateKeyphraseIndicator(results.checks);
+        this.updateContentAnalysis(results.checks);
+    }
 
-        // Update checks list
-        const checksList = document.getElementById('seo-checks-list');
-        if (checksList) {
-            checksList.innerHTML = '';
-            
-            Object.keys(results.checks).forEach(checkName => {
-                const check = results.checks[checkName];
-                const checkItem = document.createElement('div');
-                checkItem.className = `seo-check-item seo-check-${check.status}`;
-                
-                let icon = '✓';
-                if (check.status === 'bad') icon = '✗';
-                else if (check.status === 'warning') icon = '!';
-                else if (check.status === 'neutral') icon = '○';
-                
-                checkItem.innerHTML = `
-                    <span class="seo-check-icon">${icon}</span>
-                    <span class="seo-check-name">${this.analyzer.checks[checkName].name}</span>
-                    <span class="seo-check-message">${check.message}</span>
-                `;
-                
-                checksList.appendChild(checkItem);
-            });
-        }
-
-        // Update feedback
-        const feedbackPanel = document.getElementById('seo-feedback-panel');
-        const feedbackList = document.getElementById('seo-feedback-list');
+    updateProgressBar(score) {
+        const fill = document.getElementById('seo-progress-fill');
+        const scoreText = document.getElementById('seo-progress-score');
+        const status = document.getElementById('seo-progress-status');
         
-        if (feedbackList && feedbackPanel) {
-            if (results.feedback.length > 0) {
-                feedbackPanel.style.display = 'block';
-                feedbackList.innerHTML = '';
-                
-                results.feedback.forEach(item => {
-                    const feedbackItem = document.createElement('div');
-                    feedbackItem.className = `seo-feedback-item seo-feedback-${item.type}`;
-                    feedbackItem.innerHTML = `
-                        <strong>${item.check}:</strong> ${item.message}
-                    `;
-                    feedbackList.appendChild(feedbackItem);
-                });
-            } else {
-                feedbackPanel.style.display = 'none';
-            }
+        if (!fill) return;
+
+        fill.style.width = score + '%';
+        scoreText.textContent = score + '/100';
+        
+        fill.className = 'seo-progress-fill';
+        if (score >= 80) {
+            fill.classList.add('seo-excellent');
+            status.textContent = '✓ Excellent SEO optimization!';
+            status.className = 'seo-progress-status seo-status-good';
+        } else if (score >= 60) {
+            fill.classList.add('seo-good');
+            status.textContent = '⚠ Good, but can be improved';
+            status.className = 'seo-progress-status seo-status-warning';
+        } else if (score >= 40) {
+            fill.classList.add('seo-fair');
+            status.textContent = '⚠ Needs improvement';
+            status.className = 'seo-progress-status seo-status-warning';
+        } else {
+            fill.classList.add('seo-poor');
+            status.textContent = '✗ Significant improvements needed';
+            status.className = 'seo-progress-status seo-status-bad';
         }
+    }
+
+    updateTitleIndicator(lengthCheck, keyphraseCheck) {
+        const indicator = document.getElementById('seo-title-indicator');
+        if (!indicator) return;
+
+        const length = lengthCheck.value;
+        const hasKeyphrase = keyphraseCheck.value;
+        
+        let html = `<div class="seo-check-inline">`;
+        html += `<span class="seo-badge seo-badge-${lengthCheck.status}">${length} chars</span>`;
+        if (hasKeyphrase) {
+            html += `<span class="seo-badge seo-badge-good">✓ Keyphrase</span>`;
+        } else if (keyphraseCheck.status !== 'neutral') {
+            html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
+        }
+        html += `</div>`;
+        indicator.innerHTML = html;
+    }
+
+    updateDescriptionIndicator(lengthCheck, keyphraseCheck) {
+        const indicator = document.getElementById('seo-description-indicator');
+        if (!indicator) return;
+
+        const length = lengthCheck.value;
+        const hasKeyphrase = keyphraseCheck.value;
+        
+        let html = `<div class="seo-check-inline">`;
+        html += `<span class="seo-badge seo-badge-${lengthCheck.status}">${length} chars</span>`;
+        if (hasKeyphrase) {
+            html += `<span class="seo-badge seo-badge-good">✓ Keyphrase</span>`;
+        } else if (keyphraseCheck.status !== 'neutral') {
+            html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
+        }
+        html += `</div>`;
+        indicator.innerHTML = html;
+    }
+
+    updateKeyphraseIndicator(checks) {
+        const indicator = document.getElementById('seo-keyphrase-indicator');
+        if (!indicator) return;
+
+        const inTitle = checks.keyphraseInTitle.value;
+        const inDesc = checks.keyphraseInDescription.value;
+        const inUrl = checks.keyphraseInSlug.value;
+        const inContent = checks.keyphraseInContent.value > 0;
+        
+        let html = `<div class="seo-check-inline"><span class="seo-badge-label">Used in:</span>`;
+        html += `<span class="seo-badge ${inTitle ? 'seo-badge-good' : 'seo-badge-bad'}">${inTitle ? '✓' : '✗'} Title</span>`;
+        html += `<span class="seo-badge ${inDesc ? 'seo-badge-good' : 'seo-badge-bad'}">${inDesc ? '✓' : '✗'} Description</span>`;
+        html += `<span class="seo-badge ${inUrl ? 'seo-badge-good' : 'seo-badge-warning'}">${inUrl ? '✓' : '⚠'} URL</span>`;
+        html += `<span class="seo-badge ${inContent ? 'seo-badge-good' : 'seo-badge-bad'}">${inContent ? '✓' : '✗'} Content</span>`;
+        html += `</div>`;
+        
+        indicator.innerHTML = html;
+    }
+
+    updateContentAnalysis(checks) {
+        const container = document.getElementById('seo-content-checks');
+        if (!container) return;
+
+        let html = '<div class="seo-checks-grid">';
+        
+        html += this.createCheckCard('Content Length', checks.contentLength.message, checks.contentLength.status, '📝');
+        html += this.createCheckCard('Keyphrase Density', checks.keyphraseDensity.message, checks.keyphraseDensity.status, '🎯');
+        html += this.createCheckCard('Internal Links', checks.internalLinks.message, checks.internalLinks.status, '🔗');
+        html += this.createCheckCard('External Links', checks.externalLinks.message, checks.externalLinks.status, '🌐');
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    createCheckCard(title, message, status, icon) {
+        return `
+            <div class="seo-check-card seo-check-${status}">
+                <span class="seo-check-icon">${icon}</span>
+                <div class="seo-check-content">
+                    <div class="seo-check-title">${title}</div>
+                    <div class="seo-check-message">${message}</div>
+                </div>
+            </div>
+        `;
     }
 
     changeTarget(field) {
