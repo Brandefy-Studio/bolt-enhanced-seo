@@ -1,12 +1,12 @@
 {
-    "name": "appolodev/bolt-seo",
-    "description": "Bolt 5 - Seo extension",
+    "name": "brandefy-studio/bolt-enhanced-seo",
+    "description": "Enhanced SEO extension for Bolt 5",
     "type": "bolt-extension",
     "license": "MIT",
     "authors": [
         {
-            "name": "AppoloDev",
-            "email": "contact@appolo.fr"
+            "name": "Brandefy Studio",
+            "email": "dev@brandefycreative.com"
         }
     ],
     "require": {
@@ -22,13 +22,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Appolo\\BoltSeo\\": "src/"
+            "Brandefy\\BoltEnhancedSeo\\": "src/"
         }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
-        "entrypoint": "Appolo\\BoltSeo\\Extension"
+        "entrypoint": "Brandefy\\BoltEnhancedSeo\\Extension"
     },
     "config": {
         "allow-plugins": {
