@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo\Seo;
+namespace Brandefy\BoltEnhancedSeo\Seo;
 
 use Bolt\Configuration\Content\ContentType;
 use Bolt\Entity\Content;

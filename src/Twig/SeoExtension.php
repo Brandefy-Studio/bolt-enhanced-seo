@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo\Twig;
+namespace Brandefy\BoltEnhancedSeo\Twig;
 
-use Appolo\BoltSeo\Extension;
-use Appolo\BoltSeo\Seo\ContentField;
+use Brandefy\BoltEnhancedSeo\Extension;
+use Brandefy\BoltEnhancedSeo\Seo\ContentField;
 use Bolt\Configuration\Config;
 use Bolt\Configuration\Content\ContentType;
 use Bolt\Entity\Content;
@@ -107,7 +107,7 @@ class SeoExtension extends AbstractExtension
 
     private function getExtension(): ExtensionInterface
     {
-        return $this->extensionRegistry->getExtension('Appolo\\BoltSeo');
+        return $this->extensionRegistry->getExtension('Brandefy\\BoltEnhancedSeo');
     }
 
     private function getExtensionConfig(): Collection

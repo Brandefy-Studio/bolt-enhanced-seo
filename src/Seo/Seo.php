@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo\Seo;
+namespace Brandefy\BoltEnhancedSeo\Seo;
 
 use Bolt\Configuration\Config;
 use Bolt\Configuration\Content\ContentType;
@@ -16,7 +16,7 @@ use Twig\Environment;
 use Twig\Markup;
 
 /**
- * @package Appolo\BoltSeo\Seo
+ * @package Brandefy\BoltEnhancedSeo\Seo
  * Priority:
  *  1. Override default
  *  2. Seo fields

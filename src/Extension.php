@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo;
+namespace Brandefy\BoltEnhancedSeo;
 
-use Appolo\BoltSeo\Seo\Seo;
-use Appolo\BoltSeo\Widget\SeoInjectorWidget;
+use Brandefy\BoltEnhancedSeo\Seo\Seo;
+use Brandefy\BoltEnhancedSeo\Widget\SeoInjectorWidget;
 use Bolt\Extension\BaseExtension;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -13,7 +13,7 @@ class Extension extends BaseExtension
 {
     public function getName(): string
     {
-        return 'Bolt Seo';
+        return 'Bolt Enhanced SEO';
     }
 
     public function initialize(): void

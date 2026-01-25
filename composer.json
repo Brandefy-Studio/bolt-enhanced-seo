@@ -1,6 +1,6 @@
 {
     "name": "brandefy-studio/bolt-enhanced-seo",
-    "description": "Enhanced SEO extension for Bolt 5",
+    "description": "Enhanced SEO extension for Bolt 5 and 6 with real-time analysis, meta tags, and Google preview",
     "type": "bolt-extension",
     "license": "MIT",
     "authors": [
@@ -14,11 +14,11 @@
         "twig/twig": "^3.21"
     },
     "require-dev": {
-        "bolt/core": "^6.0",
-        "phpstan/phpstan": "2.1.33",
-        "rector/rector": "2.2.14",
+        "bolt/core": "^5.0|^6.0",
+        "phpstan/phpstan": "^2.1",
+        "rector/rector": "^2.2",
         "symplify/easy-coding-standard": "^13",
-        "phpstan/phpstan-symfony": "2.0.9"
+        "phpstan/phpstan-symfony": "^2.0"
     },
     "autoload": {
         "psr-4": {

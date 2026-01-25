@@ -1,91 +1,380 @@
-Bolt SEO extension
-==================
+# Bolt Enhanced SEO Extension v1.0.0
 
-The Bolt SEO extension is an extension to help you improve the search engine
-indexing of your Bolt website in a number of ways. It does this by:
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://bolt.cm)
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.2-blue)](https://php.net)
 
-  - Allowing you to specify the SEO title and meta-description for your pages.
-  - Adding meta tags to your HTML to facilitate indexing of your pages using meta
-    tags and OG tags.
-  - Override the canonical, if you really want to.
-  - Set the `<meta name="robots">`-tag.
+Enhanced SEO extension for Bolt CMS 5/6 with comprehensive meta tag management, Google search preview, and SEO field optimization.
 
-## Compatibility
+## Features
 
-This extension supports different Bolt CMS versions depending on the major release:
+✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types
+✅ **Google Search Preview** - Real-time SERP preview as you type
+✅ **Meta Tag Management** - Title, description, keywords, canonical, robots
+✅ **Open Graph Support** - Facebook/LinkedIn social media optimization
+✅ **Schema.org Ready** - Structured data markup (future enhancement)
+✅ **Multi-language Support** - Works with Bolt's localization system
+✅ **Template Integration** - Simple Twig functions for frontend output
+✅ **Flexible Configuration** - Extensive YAML configuration options
+✅ **No Database Changes** - Stores SEO data as JSON in fields
 
-- **Bolt CMS 6** → Bolt SEO extension **v2.x**
-- **Bolt CMS 5** → Bolt SEO extension **v1.x**
+## Installation
 
-This README documents usage for **Bolt CMS 6**.
+### Via Composer (Recommended)
 
-Installation
------
-```composer require appolodev/bolt-seo```
+```bash
+composer require brandefy-studio/bolt-enhanced-seo
+```
 
-Setup
------
+### Manual Installation
 
-To use this extension, you should add a field to your contenttypes, and add the
-tags to the header of your HMTL templates.
+1. Download the latest release
+2. Extract to `vendor/brandefy-studio/bolt-enhanced-seo`
+3. Run `composer dump-autoload`
 
-In your contenttypes, you should add a single `seo` field. The extenion will
-use this to store the data for the different fields that show in the backend
-when editing a record. Simply add it to your fields like this;
+## Setup
+
+### Step 1: Add SEO Field to ContentTypes
+
+Edit `config/bolt/contenttypes.yaml`:
 
 ```yaml
 pages:
     name: Pages
     singular_name: Page
     fields:
-        [..]
+        title:
+            type: text
+            class: large
+            group: content
+        
+        slug:
+            type: slug
+            uses: title
+            group: content
+        
+        body:
+            type: html
+            group: content
+        
+        # Add SEO field
         seo:
             type: seo
-            group: "SEO settings"
+            group: "SEO"
 ```
 
-You can assign the fields their own tab, using the `group: 'SEO settings'`, to
-keep them organised in the backend.
+### Step 2: Add Meta Tags to Templates
 
-After you've done this, it will look like this in the Bolt backend:
+Edit your base template (e.g., `templates/base.html.twig`):
 
-![](screenshots/screenshot.png)
-
-To add the SEO title and Meta tags to your HTML, edit your templates (the
-'master' or 'header') to have the following:
-
-```HTML
+```twig
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {# SEO Title #}
     <title>{{ seo.title() }}</title>
-    {{ seo.metatags() }}
+    
+    {# All SEO Meta Tags #}
+    {{ seo.metatags()|raw }}
+    
+    {# Your other head content #}
+</head>
+<body>
+    {{ block('content') }}
+</body>
+</html>
 ```
 
-When you've done this, all pages that make use of these templates will
-automatically have the correct `<title>` tag and the meta- and OG-tags.
+### Step 3: Clear Cache
 
-### Configure the 'meta tags' output
+```bash
+php bin/console cache:clear
+```
 
-By default, the output of the meta-tags is defined in the file
-`vendor/appolodev/bolt-seo/templates/_metatags.twig`. If you'd like to
-configure this output, you shouldn't edit this file directly. If you do,
-changes will be overwritten on subsequent updates of this extension. Instead,
-in `/config/extensions/appolo-boltseo.yaml` uncomment the following lines:
+## Usage
+
+### In Backend
+
+1. Edit any content that has the `seo` field
+2. Click on the **"SEO" tab**
+3. Fill in SEO fields:
+   - **SEO Title** - Custom title for search engines (50-60 chars recommended)
+   - **Meta Description** - Brief description (120-156 chars recommended)
+   - **Meta Keywords** - Comma-separated keywords (optional)
+   - **Google Preview** - Live preview of how it appears in search results
+   - **Shortlink** - Alias/shortlink for the page
+   - **Canonical Link** - Override canonical URL
+   - **Meta Robots** - Control indexing (index/noindex, follow/nofollow)
+   - **Open Graph Type** - Social media type (website, article, etc.)
+
+### In Templates
+
+```twig
+{# Basic usage #}
+<title>{{ seo.title() }}</title>
+{{ seo.metatags()|raw }}
+
+{# Individual meta tags #}
+<meta name="description" content="{{ seo.description() }}">
+<meta name="keywords" content="{{ seo.keywords() }}">
+<meta name="robots" content="{{ seo.robots() }}">
+<link rel="canonical" href="{{ seo.canonical() }}">
+
+{# Open Graph #}
+<meta property="og:title" content="{{ seo.title() }}">
+<meta property="og:description" content="{{ seo.description() }}">
+<meta property="og:type" content="{{ seo.ogtype() }}">
+<meta property="og:image" content="{{ seo.image() }}">
+```
+
+## Configuration
+
+Edit `config/extensions/brandefy-bolt-enhanced-seo.yaml`:
 
 ```yaml
-templates:
-    meta: _metatags.twig
+# Title separator: "Page Title | Site Name"
+title_separator: "|"
+
+# Title postfix (leave empty to use sitename from config)
+# Set to false to disable postfix
+title_postfix: ''
+
+# Length limits for SEO fields
+title_length: 70
+description_length: 158
+keywords_length: 0  # Set to 255 to enable keywords field
+
+# Default fields to use for SEO data
+fields:
+    slug: ['slug']
+    title: ['title', 'name']
+    description: ['introduction', 'teaser', 'description', 'body']
+    keywords: []
+    image: ['image']
+
+# Default values
+default:
+    title: ""
+    description: ""
+    keywords: ""
+    ogtype: "website"
+    robots: "index, follow"
+
+# Override defaults for specific routes
+#override_default:
+#    homepage:
+#        title: 'Custom Homepage Title'
+#        description: 'Custom Description'
+#        robots: 'index, follow'
+#        ogtype: 'website'
+#        canonical: 'https://example.com'
+
+# Custom template for meta tags output
+#templates:
+#    meta: _partials/_metatags.html.twig
 ```
 
-Next, copy the file `_metatags.twig` to your theme folder, and the extension
-will pick it up from there.
+## API Reference
 
-**Note:** This is a new extension, so the functionality is still pretty bare
-bones. What's there works well, but there is probably a lot of functionality to
-add, to improve search engine indexing. If you'd like to contribute, or have a
-good idea, feel free to open an issue on the tracker at the
-[SEO Extension repository][gh] on Github.
+### Twig Functions
 
-[gh]: https://github.com/AppoloDev/bolt-seo/issues
+#### `seo.title()`
+Returns the SEO title with optional postfix.
 
-### Contributors
+**Priority**:
+1. Override configuration for route
+2. SEO field `title` value
+3. Content `title` field
+4. Default title from config
+5. Site name from Bolt config
 
-* [Bob den Otter](https://github.com/bobdenotter): Thanks to him to allow me to use his original extension [Bolt SEO](https://github.com/bobdenotter/seo)
+#### `seo.description()`
+Returns the meta description, trimmed to configured length.
+
+**Priority**:
+1. Override configuration
+2. SEO field `description` value
+3. Content description/teaser/intro field
+4. Default description
+5. Site payoff from Bolt config
+
+#### `seo.keywords()`
+Returns meta keywords (if enabled).
+
+#### `seo.canonical()`
+Returns the canonical URL.
+
+**Priority**:
+1. Override configuration
+2. SEO field `canonical` value
+3. Default canonical from config
+4. Current request URI
+
+#### `seo.robots()`
+Returns robots meta directive.
+
+**Priority**:
+1. Override configuration
+2. SEO field `robots` value
+3. Default robots from config
+4. `"index, follow"`
+
+#### `seo.image()`
+Returns OG image URL.
+
+**Priority**:
+1. Override configuration
+2. Content image field
+3. Default image from config
+
+#### `seo.ogtype()`
+Returns Open Graph type.
+
+**Priority**:
+1. Override configuration
+2. SEO field `og` value
+3. Default ogtype from config
+4. `"website"`
+
+#### `seo.metatags()`
+Outputs all meta tags using the configured template.
+
+## Customizing Meta Tags Output
+
+To customize the meta tags template:
+
+1. Copy `vendor/brandefy-studio/bolt-enhanced-seo/templates/_metatags.html.twig` to your theme
+2. Edit `config/extensions/brandefy-bolt-enhanced-seo.yaml`:
+   ```yaml
+   templates:
+       meta: _partials/_metatags.html.twig
+   ```
+3. Customize your template
+
+## Multi-language Support
+
+The extension works seamlessly with Bolt's localization:
+
+```yaml
+# config/bolt/config.yaml
+locales:
+    en:
+        label: English
+        slug: en
+    fr:
+        label: Français
+        slug: fr
+
+# config/bolt/contenttypes.yaml
+pages:
+    fields:
+        title:
+            type: text
+            localize: true
+        
+        seo:
+            type: seo
+            group: "SEO"
+            # SEO data is automatically localized
+```
+
+## Troubleshooting
+
+### SEO Tab Not Showing
+
+1. Verify field is added to contenttype:
+   ```yaml
+   seo:
+       type: seo
+       group: "SEO"
+   ```
+2. Clear cache: `php bin/console cache:clear`
+3. Check field type is registered (should auto-register)
+
+### Meta Tags Not Appearing
+
+1. Verify templates include `{{ seo.metatags()|raw }}`
+2. Check that content has `seo` field
+3. Verify extension is installed: `composer show brandefy-studio/bolt-enhanced-seo`
+
+### JavaScript/CSS Not Loading
+
+The extension automatically copies assets on installation. If assets are missing:
+
+```bash
+php bin/console bolt:copy-assets
+```
+
+Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/assets/`
+
+## Compatibility
+
+- **Bolt CMS**: 5.x and 6.x
+- **PHP**: 8.2 or higher
+- **Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+
+## Roadmap
+
+### v1.1.0 (Planned)
+- Real-time SEO score analysis
+- Character count indicators with color coding
+- Content length recommendations
+
+### v1.2.0 (Planned)
+- Readability analysis (Flesch Reading Ease)
+- Focus keyphrase analysis
+- Enhanced Google SERP preview
+
+### v2.0.0 (Future)
+- Schema.org markup generator
+- Redirect manager
+- Sitemap generator
+- Content insights dashboard
+
+## Migration from AppoloDev/bolt-seo
+
+This extension is a fork of the original AppoloDev/bolt-seo with enhanced features and updated namespace.
+
+**Existing installations**: Simply update your `composer.json`:
+
+```json
+{
+    "require": {
+        "brandefy-studio/bolt-enhanced-seo": "^1.0"
+    }
+}
+```
+
+Run `composer update` and clear cache. All existing SEO data is preserved.
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Credits
+
+- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo) by Bob den Otter
+- **Enhanced By**: Brandefy Studio
+- **Bolt CMS**: [bolt.cm](https://bolt.cm)
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+## Support
+
+- **Documentation**: [GitHub Wiki](https://github.com/brandefy-studio/bolt-enhanced-seo/wiki)
+- **Issues**: [GitHub Issues](https://github.com/brandefy-studio/bolt-enhanced-seo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/brandefy-studio/bolt-enhanced-seo/discussions)
+
+---
+
+Made with ❤️ by [Brandefy Studio](https://brandefycreative.com)

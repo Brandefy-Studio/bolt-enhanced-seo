@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo\Widget;
+namespace Brandefy\BoltEnhancedSeo\Widget;
 
 use Bolt\Widget\BaseWidget;
 use Bolt\Widget\Injector\RequestZone;
@@ -14,7 +14,7 @@ class SeoInjectorWidget extends BaseWidget implements TwigAwareInterface
     protected $name = 'Seo Injector Widget';
     protected $target = Target::AFTER_JS;
     protected $zone = RequestZone::BACKEND;
-    protected $templateFolder = 'vendor/appolodev/bolt-seo/templates/';
+    protected $templateFolder = 'vendor/brandefy-studio/bolt-enhanced-seo/templates/';
     protected $template = '@seo/injector.html.twig';
     protected $priority = 200;
 

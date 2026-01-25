@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Appolo\BoltSeo\Field;
+namespace Brandefy\BoltEnhancedSeo\Field;
 
 use Bolt\Entity\Field;
 use Bolt\Entity\Field\Excerptable;

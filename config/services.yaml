@@ -4,13 +4,13 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
         mappings:
-            BoltSeo:
+            BoltEnhancedSeo:
                 is_bundle: false
                 type: attribute
-                dir: '%kernel.project_dir%/vendor/appolodev/bolt-seo/src'
-                prefix: 'Appolo\BoltSeo'
-                alias: BoltSeo
+                dir: '%kernel.project_dir%/vendor/brandefy-studio/bolt-enhanced-seo/src'
+                prefix: 'Brandefy\BoltEnhancedSeo'
+                alias: BoltEnhancedSeo
 
 framework:
     translator:
-        paths: ['%kernel.project_dir%/vendor/appolodev/bolt-seo/translations']
+        paths: ['%kernel.project_dir%/vendor/brandefy-studio/bolt-enhanced-seo/translations']
