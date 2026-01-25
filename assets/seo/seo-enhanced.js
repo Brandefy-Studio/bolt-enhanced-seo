@@ -5,6 +5,7 @@
 
 class SeoSnippet {
     constructor(container) {
+        console.log('[SEO Analyzer] Initializing v1.1.1...');
         this.container = container;
         this.analyzer = new SeoAnalyzer();
         
@@ -203,8 +204,29 @@ class SeoSnippet {
     }
 
     createProgressBar() {
-        const seoFieldSet = document.querySelector('#field-set-seo .form-set-fields');
-        if (!seoFieldSet) return;
+        console.log('[SEO Analyzer] Creating progress bar...');
+        
+        // Find the form-set-fields container (more flexible approach)
+        let seoFieldSet = this.container.closest('.form-set-fields');
+        
+        // Fallback: try to find it by looking for the parent of seo fields
+        if (!seoFieldSet) {
+            const titleInput = document.querySelector('#seofields-title');
+            if (titleInput) {
+                seoFieldSet = titleInput.closest('.form-set-fields');
+            }
+        }
+        
+        // Another fallback: find any form-set-fields that contains our snippet
+        if (!seoFieldSet) {
+            seoFieldSet = this.container.closest('.form-set')?.querySelector('.form-set-fields');
+        }
+        
+        if (!seoFieldSet) {
+            console.error('[SEO Analyzer] Could not find form-set-fields container');
+            return;
+        }
+        console.log('[SEO Analyzer] Found form-set-fields, inserting progress bar');
 
         const progressBar = document.createElement('div');
         progressBar.className = 'seo-progress-wrapper';
@@ -223,36 +245,50 @@ class SeoSnippet {
     }
 
     createInlineIndicators() {
-        // Title indicator
-        const titleHelper = document.querySelector('#field-text-seo-title .form--helper');
-        if (titleHelper) {
-            const indicator = document.createElement('div');
-            indicator.id = 'seo-title-indicator';
-            indicator.className = 'seo-inline-indicator';
-            titleHelper.appendChild(indicator);
+        console.log('[SEO Analyzer] Creating inline indicators...');
+        
+        // Title indicator - find by input ID
+        const titleInput = document.querySelector('#seofields-title');
+        if (titleInput) {
+            const titleHelper = titleInput.closest('.form-group')?.querySelector('.form--helper');
+            if (titleHelper && !titleHelper.querySelector('#seo-title-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.id = 'seo-title-indicator';
+                indicator.className = 'seo-inline-indicator';
+                titleHelper.appendChild(indicator);
+                console.log('[SEO Analyzer] Title indicator added');
+            }
         }
 
         // Description indicator
-        const descHelper = document.querySelector('#field-text-seo-description .form--helper');
-        if (descHelper) {
-            const indicator = document.createElement('div');
-            indicator.id = 'seo-description-indicator';
-            indicator.className = 'seo-inline-indicator';
-            descHelper.appendChild(indicator);
+        const descInput = document.querySelector('#seofields-description');
+        if (descInput) {
+            const descHelper = descInput.closest('.form-group')?.querySelector('.form--helper');
+            if (descHelper && !descHelper.querySelector('#seo-description-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.id = 'seo-description-indicator';
+                indicator.className = 'seo-inline-indicator';
+                descHelper.appendChild(indicator);
+                console.log('[SEO Analyzer] Description indicator added');
+            }
         }
 
         // Keyphrase indicator
-        const keyphraseHelper = document.querySelector('#field-text-seo-keyphrase .form--helper');
-        if (keyphraseHelper) {
-            const indicator = document.createElement('div');
-            indicator.id = 'seo-keyphrase-indicator';
-            indicator.className = 'seo-inline-indicator';
-            keyphraseHelper.appendChild(indicator);
+        const keyphraseInput = document.querySelector('#seofields-keyphrase');
+        if (keyphraseInput) {
+            const keyphraseHelper = keyphraseInput.closest('.form-group')?.querySelector('.form--helper');
+            if (keyphraseHelper && !keyphraseHelper.querySelector('#seo-keyphrase-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.id = 'seo-keyphrase-indicator';
+                indicator.className = 'seo-inline-indicator';
+                keyphraseHelper.appendChild(indicator);
+                console.log('[SEO Analyzer] Keyphrase indicator added');
+            }
         }
 
         // Content analysis section (after snippet)
-        const snippetField = document.querySelector('#field-text-seo-snippet');
-        if (snippetField) {
+        const snippetField = this.container.closest('.form-group');
+        if (snippetField && !document.querySelector('#seo-content-analysis')) {
             const contentAnalysis = document.createElement('div');
             contentAnalysis.id = 'seo-content-analysis';
             contentAnalysis.className = 'seo-content-analysis';
@@ -261,6 +297,7 @@ class SeoSnippet {
                 <div id="seo-content-checks" class="seo-content-checks"></div>
             `;
             snippetField.parentNode.insertBefore(contentAnalysis, snippetField.nextSibling);
+            console.log('[SEO Analyzer] Content analysis section added');
         }
     }
 
@@ -425,9 +462,36 @@ class SeoSnippet {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// Initialize immediately if DOM is ready, or wait for it
+function initSeoSnippet() {
     const seoSnippet = document.querySelector('.seo_snippet');
-    if (seoSnippet) {
+    if (seoSnippet && !seoSnippet.dataset.seoInitialized) {
+        seoSnippet.dataset.seoInitialized = 'true';
         new SeoSnippet(seoSnippet);
     }
-});
+}
+
+// Try multiple initialization methods for Bolt's dynamic loading
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSeoSnippet);
+} else {
+    // DOM already loaded, init immediately
+    initSeoSnippet();
+}
+
+// Also listen for Turbo navigation (Bolt uses Turbo)
+document.addEventListener('turbo:load', initSeoSnippet);
+document.addEventListener('turbo:render', initSeoSnippet);
+
+// Fallback: Check periodically for 5 seconds
+let attempts = 0;
+const checkInterval = setInterval(() => {
+    if (attempts++ > 50) {
+        clearInterval(checkInterval);
+        return;
+    }
+    if (document.querySelector('.seo_snippet') && !document.querySelector('.seo_snippet').dataset.seoInitialized) {
+        initSeoSnippet();
+        clearInterval(checkInterval);
+    }
+}, 100);
