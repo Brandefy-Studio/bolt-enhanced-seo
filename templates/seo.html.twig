@@ -8,6 +8,7 @@
         title: '',
         description: '',
         keywords: '',
+        keyphrase: '',
         shortlink: '',
         canonical: '',
         robots: '',
@@ -22,14 +23,22 @@
         {% include '@bolt/_partials/fields/_label.html.twig' %}
 
         <div class="form-set-fields form-fields[{{ name }}]">
-            {{ block('seo_title') }}
-            {{ block('seo_description') }}
-            {{ block('seo_keywords') }}
-            {{ block('seo_snippet') }}
-            {{ block('seo_shortlink') }}
-            {{ block('seo_canonical') }}
-            {{ block('seo_robots') }}
-            {{ block('seo_og') }}
+            <div class="row">
+                <div class="col-md-8">
+                    {{ block('seo_title') }}
+                    {{ block('seo_description') }}
+                    {{ block('seo_keywords') }}
+                    {{ block('seo_keyphrase') }}
+                    {{ block('seo_snippet') }}
+                    {{ block('seo_shortlink') }}
+                    {{ block('seo_canonical') }}
+                    {{ block('seo_robots') }}
+                    {{ block('seo_og') }}
+                </div>
+                <div class="col-md-4">
+                    <div id="seo-analysis-container"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -113,6 +122,30 @@
     {% endif %}
 {% endblock %}
 
+{% block seo_keyphrase %}
+    <div id="field-text-{{ name }}-keyphrase" class="form-group in-compound is-normal">
+        <label for="field-{{ name }}-keyphrase" class="editor--label">
+            {{ __("Focus Keyphrase") }}:
+        </label>
+
+        <div>
+            <input
+                name="{{ name }}[keyphrase]"
+                class="form-control"
+                id="seofields-keyphrase"
+                maxlength="100"
+                type="text"
+                value="{{ seovalues.keyphrase|default('') }}"
+                placeholder="e.g., bolt cms seo"
+            />
+        </div>
+
+        <div id="field-{{ name }}-keyphrase_postfix" class="form--helper">
+            <p>{{ __("Enter the main keyword or phrase you want to rank for. This will be used for SEO analysis.") }}</p>
+        </div>
+    </div>
+{% endblock %}
+
 {% block seo_snippet %}
     {% set titleField = seoFieldDefinition(record, 'title') %}
     {% set descriptionField = seoFieldDefinition(record, 'description') %}
@@ -134,6 +167,7 @@
                 data-field-title="{{ titleField ? 'fields['~titleField.slug~']' : '' }}"
                 data-field-description="{{ descriptionField ? 'fields['~descriptionField.slug~']' : '' }}"
                 data-field-slug="{{ slugField ? 'fields['~slugField.slug~']' : '' }}"
+                data-field-content="fields[body]"
                 data-seo-field="{{ name }}"
             >
                 <div class="url">
