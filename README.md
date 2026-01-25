@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://bolt.cm)
-[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.2-blue)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)](https://php.net)
 
 Enhanced SEO extension for Bolt CMS 5/6 with comprehensive meta tag management, Google search preview, and SEO field optimization.
 
