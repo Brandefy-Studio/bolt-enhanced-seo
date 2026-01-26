@@ -263,20 +263,24 @@
         </label>
 
         <div>
-            <input
-                    name="{{ name }}[og]"
-                    class="form-control"
-                    id="seofields-og"
-                    maxlength="255"
-                    type="text"
-                    value="{{ seovalues.og|default('') }}"
-            />
+            <select
+                name="{{ name }}[og]"
+                class="form-control"
+                id="seofields-og"
+            >
+                <option value="">{{ __("Default (website)") }}</option>
+                {% for option in ['website', 'article', 'blog', 'book', 'profile', 'video.movie', 'video.episode', 'video.tv_show', 'video.other', 'music.song', 'music.album', 'music.playlist', 'music.radio_station'] %}
+                    <option value="{{ option }}" {% if seovalues.og is defined and seovalues.og == option %}selected{% endif %}>
+                        {{ option }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <div id="field-{{ name }}-og_postfix" class="form--helper">
             <p>
-                {{ __('Use this to set the <tt>&lt;meta name="og:type"&gt;</tt>') }}.
-                {{ __("Leave blank for the default") }}.
+                {{ __('Use this to set the <tt>&lt;meta property="og:type"&gt;</tt>') }}.
+                {{ __("Leave blank or select 'Default' for website type") }}.
             </p>
         </div>
     </div>

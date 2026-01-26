@@ -178,7 +178,7 @@ class SeoSnippet {
             if (!input) return;
 
             let eventName = 'keyup';
-            if (key === 'robots') {
+            if (key === 'robots' || key === 'og') {
                 eventName = 'change';
             }
 
