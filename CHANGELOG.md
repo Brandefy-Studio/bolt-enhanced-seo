@@ -2,34 +2,78 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.1.1] - 2026-01-26
+
+### Changed - UX Improvements 🎨
+- **Progress Bar** replaces circular score display at top of SEO tab
+- **Inline Indicators** - Analysis results appear under each field
+- **Single Column Layout** - Removed cluttered sidebar
+- **Cleaner UI** - More space, less cramped appearance
+- **Better Content Detection** - Analyzes all textarea, redactor, and article fields
+- **Mobile Responsive** - Optimized for all screen sizes
+
+### Added
+- Progress bar with gradient colors (red/orange/green)
+- Inline badges under title/description showing character count and keyphrase status
+- Keyphrase usage indicators (Title, Description, URL, Content)
+- Content analysis cards grid (length, density, links)
+- CKEditor support for content analysis
+- Dark mode support (follows system preference)
+- High contrast mode support
+- Reduced motion support for accessibility
+
+### Fixed
+- Content fields now properly detected (textarea, redactor, article types)
+- Analysis accounts for all content fields, not just body
+- Mobile layout no longer cramped
+- Better spacing and visual hierarchy
+
+## [1.1.0] - 2026-01-26
+
+### Added - Real-time SEO Analyzer 🎯
+- **Comprehensive SEO Scoring** (0-100) with visual circle indicator
+- **10 Automated SEO Checks**:
+  - SEO Title Length (30-60 chars optimal)
+  - Meta Description Length (120-160 chars optimal)
+  - Focus Keyphrase in Title
+  - Focus Keyphrase in Description  
+  - Focus Keyphrase in URL/Slug
+  - Focus Keyphrase in Content
+  - Keyphrase Density (0.5-2.5% optimal)
+  - Content Length (300+ words minimum)
+  - External Links Detection
+  - Internal Links Detection
+- **Focus Keyphrase Field** - Set main keyword for optimization
+- **Visual Feedback** - Color-coded checks (green✓/yellow!/red✗)
+- **Live Analysis** - Updates as you type, every 2 seconds
+- **Improvement Suggestions** - Actionable feedback panel
+- **Sidebar Analysis Panel** - Sticky panel with all metrics
+
+### Changed
+- Enhanced 2-column layout (content/analysis split)
+- Improved character counters with color coding
+- Better Google snippet preview styling
+- Reorganized field order for better UX
+
+### Technical
+- `seo-analyzer.js` - New analysis engine (400+ lines)
+- `seo-enhanced.js` - Enhanced controller with live updates
+- `seo-analyzer.css` - Analysis UI styles
+- Weighted scoring algorithm for accurate SEO assessment
+- Auto-refresh analysis every 2 seconds
+- Content field detection from editor
 
 ## [1.0.0] - 2026-01-25
 
-### Added
-- Initial release of Bolt Enhanced SEO extension
-- Custom `seo` field type for content types
-- Google Search Preview with real-time updates
-- Comprehensive meta tag management (title, description, keywords, canonical, robots)
-- Open Graph support for social media
-- Multi-language/localization support
-- Flexible YAML configuration
-- Template integration via Twig functions
-- Auto-installation of assets
-- Doctrine entity mapping
-- Translation support (English, French)
+### Initial Release
+- Custom SEO field type
+- Google Search Preview  
+- Meta tags management
+- Open Graph support
+- Multi-language support
+- Twig template integration
+- PHP 8.1+ support
+- Bolt 5 & 6 compatible
 
-### Changed
-- Namespace updated from `Appolo\BoltSeo` to `Brandefy\BoltEnhancedSeo`
-- Package name updated to `brandefy-studio/bolt-enhanced-seo`
-- Enhanced extension name to "Bolt Enhanced SEO"
-
-### Security
-- No security issues in this release
-
-## Credits
-
-Based on the excellent [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo) extension by Bob den Otter.
-
-[1.0.0]: https://github.com/brandefy-studio/bolt-enhanced-seo/releases/tag/v1.0.0
+---
+Based on [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)

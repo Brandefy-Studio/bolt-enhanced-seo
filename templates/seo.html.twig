@@ -8,6 +8,7 @@
         title: '',
         description: '',
         keywords: '',
+        keyphrase: '',
         shortlink: '',
         canonical: '',
         robots: '',
@@ -25,6 +26,7 @@
             {{ block('seo_title') }}
             {{ block('seo_description') }}
             {{ block('seo_keywords') }}
+            {{ block('seo_keyphrase') }}
             {{ block('seo_snippet') }}
             {{ block('seo_shortlink') }}
             {{ block('seo_canonical') }}
@@ -113,6 +115,30 @@
     {% endif %}
 {% endblock %}
 
+{% block seo_keyphrase %}
+    <div id="field-text-{{ name }}-keyphrase" class="form-group in-compound is-normal">
+        <label for="field-{{ name }}-keyphrase" class="editor--label">
+            {{ __("Focus Keyphrase") }}:
+        </label>
+
+        <div>
+            <input
+                name="{{ name }}[keyphrase]"
+                class="form-control"
+                id="seofields-keyphrase"
+                maxlength="100"
+                type="text"
+                value="{{ seovalues.keyphrase|default('') }}"
+                placeholder="e.g., bolt cms seo"
+            />
+        </div>
+
+        <div id="field-{{ name }}-keyphrase_postfix" class="form--helper">
+            <p>{{ __("Enter the main keyword or phrase you want to rank for. This will be used for SEO analysis.") }}</p>
+        </div>
+    </div>
+{% endblock %}
+
 {% block seo_snippet %}
     {% set titleField = seoFieldDefinition(record, 'title') %}
     {% set descriptionField = seoFieldDefinition(record, 'description') %}
@@ -134,6 +160,7 @@
                 data-field-title="{{ titleField ? 'fields['~titleField.slug~']' : '' }}"
                 data-field-description="{{ descriptionField ? 'fields['~descriptionField.slug~']' : '' }}"
                 data-field-slug="{{ slugField ? 'fields['~slugField.slug~']' : '' }}"
+                data-field-content="fields[body]"
                 data-seo-field="{{ name }}"
             >
                 <div class="url">
@@ -236,20 +263,24 @@
         </label>
 
         <div>
-            <input
-                    name="{{ name }}[og]"
-                    class="form-control"
-                    id="seofields-og"
-                    maxlength="255"
-                    type="text"
-                    value="{{ seovalues.og|default('') }}"
-            />
+            <select
+                name="{{ name }}[og]"
+                class="form-control"
+                id="seofields-og"
+            >
+                <option value="">{{ __("Default (website)") }}</option>
+                {% for option in ['website', 'article', 'blog', 'book', 'profile', 'video.movie', 'video.episode', 'video.tv_show', 'video.other', 'music.song', 'music.album', 'music.playlist', 'music.radio_station'] %}
+                    <option value="{{ option }}" {% if seovalues.og is defined and seovalues.og == option %}selected{% endif %}>
+                        {{ option }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <div id="field-{{ name }}-og_postfix" class="form--helper">
             <p>
-                {{ __('Use this to set the <tt>&lt;meta name="og:type"&gt;</tt>') }}.
-                {{ __("Leave blank for the default") }}.
+                {{ __('Use this to set the <tt>&lt;meta property="og:type"&gt;</tt>') }}.
+                {{ __("Leave blank or select 'Default' for website type") }}.
             </p>
         </div>
     </div>

@@ -1,18 +1,34 @@
-# Bolt Enhanced SEO Extension v1.0.0
+# Bolt Enhanced SEO Extension v1.1.1
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://bolt.cm)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)](https://php.net)
+[![Version](https://img.shields.io/badge/version-1.1.1-green.svg)](CHANGELOG.md)
 
-Enhanced SEO extension for Bolt CMS 5/6 with comprehensive meta tag management, Google search preview, and SEO field optimization.
+Enhanced SEO extension for Bolt CMS 5/6 with **real-time SEO analysis**, comprehensive meta tag management, and Google search preview.
+
+## ✨ What's New in v1.1.1
+
+🎨 **Improved UX** - Cleaner, more intuitive interface!
+- **Progress Bar** at top (instead of sidebar circle)
+- **Inline Indicators** under each field
+- **Single Column Layout** - No more cramped sidebar
+- **Better Content Detection** - Analyzes all content fields
+- **Mobile Optimized** - Perfect on all devices
 
 ## Features
 
+✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.1
+   - Progress bar with live scoring (0-100)
+   - Inline analysis under each field
+   - 10 comprehensive SEO checks
+   - Focus keyphrase optimization
+   - Clean, uncluttered interface
+   
 ✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types
 ✅ **Google Search Preview** - Real-time SERP preview as you type
 ✅ **Meta Tag Management** - Title, description, keywords, canonical, robots
 ✅ **Open Graph Support** - Facebook/LinkedIn social media optimization
-✅ **Schema.org Ready** - Structured data markup (future enhancement)
 ✅ **Multi-language Support** - Works with Bolt's localization system
 ✅ **Template Integration** - Simple Twig functions for frontend output
 ✅ **Flexible Configuration** - Extensive YAML configuration options
@@ -95,6 +111,36 @@ php bin/console cache:clear
 ```
 
 ## Usage
+
+### Real-time SEO Analyzer (v1.1.0+)
+
+The SEO Analyzer provides instant feedback as you write content:
+
+#### SEO Score
+- **0-49** (Red) - Needs significant improvement
+- **50-79** (Orange) - Good, but can be better
+- **80-100** (Green) - Excellent SEO optimization!
+
+#### 10 Automated Checks
+
+1. **SEO Title Length** - Optimal: 30-60 characters
+2. **Meta Description Length** - Optimal: 120-160 characters
+3. **Focus Keyphrase in Title** - Best at start of title
+4. **Focus Keyphrase in Description** - Should appear naturally
+5. **Focus Keyphrase in URL** - Improves relevance
+6. **Focus Keyphrase in Content** - Use 3+ times naturally
+7. **Keyphrase Density** - Optimal: 0.5-2.5% (avoid keyword stuffing)
+8. **Content Length** - Minimum 300 words, optimal 800+
+9. **External Links** - Link to authoritative sources (1-3 links)
+10. **Internal Links** - Link to related pages (2-5 links)
+
+#### How to Use
+
+1. **Set Focus Keyphrase**: Enter your target keyword/phrase
+2. **Write Content**: The analyzer updates as you type
+3. **Check Score**: Watch the score circle in the sidebar
+4. **Follow Suggestions**: Review the improvement panel
+5. **Optimize**: Make changes to improve your score
 
 ### In Backend
 
@@ -313,7 +359,7 @@ Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/a
 ## Compatibility
 
 - **Bolt CMS**: 5.x and 6.x
-- **PHP**: 8.2 or higher
+- **PHP**: 8.1 or higher
 - **Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
 ## Roadmap
@@ -361,7 +407,7 @@ Contributions are welcome! Please:
 
 ## Credits
 
-- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo) by Bob den Otter
+- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
 - **Enhanced By**: Brandefy Studio
 - **Bolt CMS**: [bolt.cm](https://bolt.cm)
 
