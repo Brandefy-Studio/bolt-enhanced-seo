@@ -359,7 +359,7 @@ Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/a
 ## Compatibility
 
 - **Bolt CMS**: 5.x and 6.x
-- **PHP**: 8.2 or higher
+- **PHP**: 8.1 or higher
 - **Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
 ## Roadmap
@@ -407,7 +407,7 @@ Contributions are welcome! Please:
 
 ## Credits
 
-- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo) by Bob den Otter
+- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
 - **Enhanced By**: Brandefy Studio
 - **Bolt CMS**: [bolt.cm](https://bolt.cm)
 
