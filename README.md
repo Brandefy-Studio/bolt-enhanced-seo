@@ -1,7 +1,7 @@
 # Bolt Enhanced SEO Extension v1.1.1
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://bolt.cm)
+[![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://boltcms.io)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)](https://php.net)
 [![Version](https://img.shields.io/badge/version-1.1.1-green.svg)](CHANGELOG.md)
 
@@ -409,7 +409,7 @@ Contributions are welcome! Please:
 
 - **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
 - **Enhanced By**: Brandefy Studio
-- **Bolt CMS**: [bolt.cm](https://bolt.cm)
+- **Bolt CMS**: [boltcms.io](https://boltcms.io)
 
 ## License
 
