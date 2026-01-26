@@ -51,18 +51,15 @@ class SeoSnippet {
     }
 
     findContentFields() {
-        const fields = [];
+        const fieldSet = new Set(); // Use Set to prevent duplicates
         
         // Find all textarea, redactor, and article fields (exclude SEO fields)
         const selectors = [
-            'textarea:not([id*="seofields"])',
-            '[data-redactor]',
-            'input[type="text"][name*="[body]"]',
             'textarea[name*="[body]"]',
             'textarea[name*="[content]"]',
             'textarea[name*="[text]"]',
-            '.redactor-box textarea',
-            '.editor textarea'
+            '[data-redactor]',
+            'input[type="text"][name*="[body]"]'
         ];
 
         selectors.forEach(selector => {
@@ -70,7 +67,7 @@ class SeoSnippet {
                 document.querySelectorAll(selector).forEach(field => {
                     // Exclude SEO fields
                     if (!field.name || (!field.name.includes('[seo]') && !field.id.includes('seofields'))) {
-                        fields.push(field);
+                        fieldSet.add(field); // Set automatically prevents duplicates
                     }
                 });
             } catch(e) {
@@ -78,20 +75,30 @@ class SeoSnippet {
             }
         });
 
-        // Check for CKEditor instances
+        // Check for CKEditor instances (these won't duplicate with DOM elements)
         if (typeof CKEDITOR !== 'undefined') {
             for (let instance in CKEDITOR.instances) {
                 const editor = CKEDITOR.instances[instance];
-                fields.push({
-                    type: 'ckeditor',
-                    instance: editor,
-                    getValue: () => editor.getData(),
-                    addEventListener: (event, callback) => editor.on(event, callback)
-                });
+                // Skip if it's an SEO field
+                if (!instance.includes('seofields')) {
+                    fieldSet.add({
+                        type: 'ckeditor',
+                        instance: editor,
+                        getValue: () => editor.getData(),
+                        addEventListener: (event, callback) => editor.on(event, callback)
+                    });
+                }
             }
         }
 
-        return fields;
+        const fieldsArray = Array.from(fieldSet);
+        console.log('[SEO Analyzer] Found', fieldsArray.length, 'unique content field(s)');
+        fieldsArray.forEach((field, index) => {
+            const name = field.name || field.instance?.name || field.type || 'unknown';
+            console.log(`  Field ${index + 1}:`, name);
+        });
+        
+        return fieldsArray; // Convert Set back to Array
     }
 
     getContentFromFields() {
