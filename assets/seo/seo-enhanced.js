@@ -280,6 +280,19 @@ class SeoSnippet {
             }
         }
 
+        // Keywords indicator (only if field is enabled)
+        const keywordsInput = document.querySelector('#seofields-keywords');
+        if (keywordsInput && this.analyzer.keywordsEnabled) {
+            const keywordsHelper = keywordsInput.closest('.form-group')?.querySelector('.form--helper');
+            if (keywordsHelper && !keywordsHelper.querySelector('#seo-keywords-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.id = 'seo-keywords-indicator';
+                indicator.className = 'seo-inline-indicator';
+                keywordsHelper.appendChild(indicator);
+                console.log('[SEO Analyzer] Keywords indicator added');
+            }
+        }
+
         // Keyphrase indicator
         const keyphraseInput = document.querySelector('#seofields-keyphrase');
         if (keyphraseInput) {
@@ -326,6 +339,12 @@ class SeoSnippet {
         this.updateProgressBar(results.score);
         this.updateTitleIndicator(results.checks.titleLength, results.checks.keyphraseInTitle);
         this.updateDescriptionIndicator(results.checks.descriptionLength, results.checks.keyphraseInDescription);
+        
+        // Update keywords indicator if enabled
+        if (this.analyzer.keywordsEnabled && results.checks.keywords) {
+            this.updateKeywordsIndicator(results.checks.keywords);
+        }
+        
         this.updateKeyphraseIndicator(results.checks);
         this.updateContentAnalysis(results.checks);
     }
@@ -392,6 +411,27 @@ class SeoSnippet {
         } else if (keyphraseCheck.status !== 'neutral') {
             html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
         }
+        html += `</div>`;
+        indicator.innerHTML = html;
+    }
+
+    updateKeywordsIndicator(keywordsCheck) {
+        const indicator = document.getElementById('seo-keywords-indicator');
+        if (!indicator) return;
+
+        const count = keywordsCheck.value;
+        const status = keywordsCheck.status;
+        const message = keywordsCheck.message;
+        
+        let html = `<div class="seo-check-inline">`;
+        html += `<span class="seo-badge-label">Keywords:</span>`;
+        html += `<span class="seo-badge seo-badge-${status}">${count} keyword(s)</span>`;
+        
+        // Add status message if not optimal
+        if (status !== 'good') {
+            html += `<span class="seo-badge seo-badge-${status}">${message}</span>`;
+        }
+        
         html += `</div>`;
         indicator.innerHTML = html;
     }
