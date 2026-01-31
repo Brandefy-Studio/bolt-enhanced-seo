@@ -33,9 +33,22 @@ class SeoAnalyzer {
     }
     
     checkKeywordsEnabled() {
-        // Check if keywords field exists (field is only rendered if keywords_length > 0)
+        // Check if keywords field exists as a TEXTAREA (not hidden input)
+        // When disabled, template renders: <input type='hidden' id="seofields-keywords">
+        // When enabled, template renders: <textarea id="seofields-keywords">
         const keywordsInput = document.querySelector('#seofields-keywords');
-        return keywordsInput !== null;
+        
+        // Check if it exists AND is a textarea (not hidden input)
+        const enabled = keywordsInput !== null && keywordsInput.tagName === 'TEXTAREA';
+        
+        console.log('[SEO Analyzer] Keywords field detection:', {
+            fieldExists: keywordsInput !== null,
+            isTextarea: keywordsInput?.tagName === 'TEXTAREA',
+            isHiddenInput: keywordsInput?.type === 'hidden',
+            enabled: enabled
+        });
+        
+        return enabled;
     }
 
     analyze(data) {

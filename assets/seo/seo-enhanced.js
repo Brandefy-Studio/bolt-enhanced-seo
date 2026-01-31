@@ -254,6 +254,15 @@ class SeoSnippet {
     createInlineIndicators() {
         console.log('[SEO Analyzer] Creating inline indicators...');
         
+        // Clean up any stale keywords indicator if field is disabled
+        if (!this.analyzer.keywordsEnabled) {
+            const staleIndicator = document.getElementById('seo-keywords-indicator');
+            if (staleIndicator) {
+                console.log('[SEO Analyzer] Removing stale keywords indicator');
+                staleIndicator.remove();
+            }
+        }
+        
         // Title indicator - find by input ID
         const titleInput = document.querySelector('#seofields-title');
         if (titleInput) {
