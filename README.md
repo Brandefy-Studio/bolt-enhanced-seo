@@ -26,21 +26,21 @@ Enhanced SEO extension for Bolt CMS 5/6 with **real-time SEO analysis**, compreh
 
 ## Features
 
-- ✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.2
+✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.2
     - Live scoring (0-100) with color-coded feedback
     - 11 comprehensive SEO checks (added Keywords check)
     - Focus keyphrase optimization
     - Content analysis & suggestions
-    - Conditional scoring based on configuration
-   
-- ✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types
-- ✅ **Google Search Preview** - Real-time SERP preview as you type
-- ✅ **Meta Tag Management** - Title, description, keywords, canonical, robots
-- ✅ **Open Graph Support** - Facebook/LinkedIn social media optimization
-- ✅ **Multi-language Support** - Works with Bolt's localization system
-- ✅ **Template Integration** - Simple Twig functions for frontend output
-- ✅ **Flexible Configuration** - Extensive YAML configuration options
-- ✅ **No Database Changes** - Stores SEO data as JSON in fields
+    - Conditional scoring based on configuration  
+  
+✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types  
+✅ **Google Search Preview** - Real-time SERP preview as you type  
+✅ **Meta Tag Management** - Title, description, keywords, canonical, robots  
+✅ **Open Graph Support** - Facebook/LinkedIn social media optimization  
+✅ **Multi-language Support** - Works with Bolt's localization system  
+✅ **Template Integration** - Simple Twig functions for frontend output  
+✅ **Flexible Configuration** - Extensive YAML configuration options  
+✅ **No Database Changes** - Stores SEO data as JSON in fields  
 
 ## Installation
 
