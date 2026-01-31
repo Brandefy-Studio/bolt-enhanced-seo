@@ -254,6 +254,15 @@ class SeoSnippet {
     createInlineIndicators() {
         console.log('[SEO Analyzer] Creating inline indicators...');
         
+        // Clean up any stale keywords indicator if field is disabled
+        if (!this.analyzer.keywordsEnabled) {
+            const staleIndicator = document.getElementById('seo-keywords-indicator');
+            if (staleIndicator) {
+                console.log('[SEO Analyzer] Removing stale keywords indicator');
+                staleIndicator.remove();
+            }
+        }
+        
         // Title indicator - find by input ID
         const titleInput = document.querySelector('#seofields-title');
         if (titleInput) {
@@ -277,6 +286,19 @@ class SeoSnippet {
                 indicator.className = 'seo-inline-indicator';
                 descHelper.appendChild(indicator);
                 console.log('[SEO Analyzer] Description indicator added');
+            }
+        }
+
+        // Keywords indicator (only if field is enabled)
+        const keywordsInput = document.querySelector('#seofields-keywords');
+        if (keywordsInput && this.analyzer.keywordsEnabled) {
+            const keywordsHelper = keywordsInput.closest('.form-group')?.querySelector('.form--helper');
+            if (keywordsHelper && !keywordsHelper.querySelector('#seo-keywords-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.id = 'seo-keywords-indicator';
+                indicator.className = 'seo-inline-indicator';
+                keywordsHelper.appendChild(indicator);
+                console.log('[SEO Analyzer] Keywords indicator added');
             }
         }
 
@@ -313,6 +335,7 @@ class SeoSnippet {
             title: this.seoFieldsInputs.title?.value || this.inputs.title?.value || '',
             description: this.seoFieldsInputs.description?.value || this.inputs.description?.value || '',
             keyphrase: this.seoFieldsInputs.keyphrase?.value || '',
+            keywords: this.seoFieldsInputs.keywords?.value || '',
             slug: this.inputs.slug?.value || '',
             content: this.getContentFromFields()
         };
@@ -325,6 +348,12 @@ class SeoSnippet {
         this.updateProgressBar(results.score);
         this.updateTitleIndicator(results.checks.titleLength, results.checks.keyphraseInTitle);
         this.updateDescriptionIndicator(results.checks.descriptionLength, results.checks.keyphraseInDescription);
+        
+        // Update keywords indicator if enabled
+        if (this.analyzer.keywordsEnabled && results.checks.keywords) {
+            this.updateKeywordsIndicator(results.checks.keywords);
+        }
+        
         this.updateKeyphraseIndicator(results.checks);
         this.updateContentAnalysis(results.checks);
     }
@@ -391,6 +420,43 @@ class SeoSnippet {
         } else if (keyphraseCheck.status !== 'neutral') {
             html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
         }
+        html += `</div>`;
+        indicator.innerHTML = html;
+    }
+
+    updateKeywordsIndicator(keywordsCheck) {
+        const indicator = document.getElementById('seo-keywords-indicator');
+        if (!indicator) return;
+
+        const count = keywordsCheck.value;
+        const status = keywordsCheck.status;
+        const message = keywordsCheck.message;
+        
+        // Get character count and limit
+        const keywordsInput = document.querySelector('#seofields-keywords');
+        const charCount = keywordsInput ? keywordsInput.value.length : 0;
+        const charLimit = keywordsInput ? parseInt(keywordsInput.getAttribute('data-max-length')) || 255 : 255;
+        
+        // Determine character count status
+        let charStatus = 'good';
+        if (charCount === 0) {
+            charStatus = 'neutral';
+        } else if (charCount > charLimit) {
+            charStatus = 'bad';
+        } else if (charCount > charLimit * 0.9) {
+            charStatus = 'warning';
+        }
+        
+        let html = `<div class="seo-check-inline">`;
+        html += `<span class="seo-badge-label">Keywords:</span>`;
+        html += `<span class="seo-badge seo-badge-${status}">${count} keyword(s)</span>`;
+        html += `<span class="seo-badge seo-badge-${charStatus}">${charCount}/${charLimit} chars</span>`;
+        
+        // Add status message if not optimal
+        if (status !== 'good') {
+            html += `<span class="seo-badge seo-badge-${status}">${message}</span>`;
+        }
+        
         html += `</div>`;
         indicator.innerHTML = html;
     }

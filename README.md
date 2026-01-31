@@ -1,29 +1,37 @@
-# Bolt Enhanced SEO Extension v1.1.1
+# Bolt Enhanced SEO Extension v1.1.2
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bolt CMS](https://img.shields.io/badge/Bolt%20CMS-5%20%7C%206-blue)](https://boltcms.io)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue)](https://php.net)
-[![Version](https://img.shields.io/badge/version-1.1.1-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.2-green.svg)](CHANGELOG.md)
 
 Enhanced SEO extension for Bolt CMS 5/6 with **real-time SEO analysis**, comprehensive meta tag management, and Google search preview.
 
-## ✨ What's New in v1.1.1
+## ✨ What's New in v1.1.2
 
-🎨 **Improved UX** - Cleaner, more intuitive interface!
-- **Progress Bar** at top (instead of sidebar circle)
-- **Inline Indicators** under each field
-- **Single Column Layout** - No more cramped sidebar
-- **Better Content Detection** - Analyzes all content fields
-- **Mobile Optimized** - Perfect on all devices
+🎯 **Keywords Field Scoring** - Keywords now contribute to SEO score!
+- **Conditional weighting** - Only scored when enabled (maxlength > 0)
+- **Smart detection** - 7-15 keywords = optimal score
+- **Auto-normalization** - Score adjusts when keywords disabled
+- **11 Comprehensive Checks** - Added keywords analysis
+
+### What's New in v1.1.0
+
+🎯 **Real-time SEO Analyzer** - Get instant feedback as you write!
+- **Live SEO Score (0-100)** with visual circle indicator
+- **10 Automated Checks** running in real-time
+- **Focus Keyphrase Analysis** - Optimize for your target keyword
+- **Smart Suggestions** - Actionable improvements as you type
+- **Content Quality Checks** - Length, density, links analysis
 
 ## Features
 
-✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.1
-   - Progress bar with live scoring (0-100)
-   - Inline analysis under each field
-   - 10 comprehensive SEO checks
+✅ **Real-time SEO Analyzer** ⭐ Enhanced in v1.1.2
+   - Live scoring (0-100) with color-coded feedback
+   - 11 comprehensive SEO checks (added Keywords check)
    - Focus keyphrase optimization
-   - Clean, uncluttered interface
+   - Content analysis & suggestions
+   - Conditional scoring based on configuration
    
 ✅ **Custom SEO Field Type** - Dedicated `seo` field for all content types
 ✅ **Google Search Preview** - Real-time SERP preview as you type
@@ -112,7 +120,7 @@ php bin/console cache:clear
 
 ## Usage
 
-### Real-time SEO Analyzer (v1.1.0+)
+### Real-time SEO Analyzer (v1.1.2+)
 
 The SEO Analyzer provides instant feedback as you write content:
 
@@ -121,18 +129,19 @@ The SEO Analyzer provides instant feedback as you write content:
 - **50-79** (Orange) - Good, but can be better
 - **80-100** (Green) - Excellent SEO optimization!
 
-#### 10 Automated Checks
+#### 11 Automated Checks
 
 1. **SEO Title Length** - Optimal: 30-60 characters
 2. **Meta Description Length** - Optimal: 120-160 characters
 3. **Focus Keyphrase in Title** - Best at start of title
 4. **Focus Keyphrase in Description** - Should appear naturally
 5. **Focus Keyphrase in URL** - Improves relevance
-6. **Focus Keyphrase in Content** - Use 3+ times naturally
-7. **Keyphrase Density** - Optimal: 0.5-2.5% (avoid keyword stuffing)
-8. **Content Length** - Minimum 300 words, optimal 800+
-9. **External Links** - Link to authoritative sources (1-3 links)
-10. **Internal Links** - Link to related pages (2-5 links)
+6. **Keywords** (Conditional) - 7-15 relevant keywords (only when enabled)
+7. **Focus Keyphrase in Content** - Use 3+ times naturally
+8. **Keyphrase Density** - Optimal: 0.5-2.5% (avoid keyword stuffing)
+9. **Content Length** - Minimum 300 words, optimal 800+
+10. **External Links** - Link to authoritative sources (1-3 links)
+11. **Internal Links** - Link to related pages (2-5 links)
 
 #### How to Use
 
@@ -191,7 +200,7 @@ title_postfix: ''
 # Length limits for SEO fields
 title_length: 70
 description_length: 158
-keywords_length: 0  # Set to 255 to enable keywords field
+keywords_length: 0  # Set to 255 to enable keywords field and scoring
 
 # Default fields to use for SEO data
 fields:
@@ -407,8 +416,8 @@ Contributions are welcome! Please:
 
 ## Credits
 
-- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
-- **Enhanced By**: Brandefy Studio
+- **Forked From**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
+- **Enhanced By**: Brandefy Creative Studio
 - **Bolt CMS**: [boltcms.io](https://boltcms.io)
 
 ## License
@@ -423,4 +432,4 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-Made with ❤️ by [Brandefy Studio](https://brandefycreative.com)
+Made with ❤️ by [Brandefy Creative Studio](https://brandefycreative.com)

@@ -171,7 +171,7 @@
     display: flex;
     align-items: flex-start;
     padding: 12px 15px;
-    background: #fff !important;
+    background: #fff;
     border-radius: 6px;
     border-left: 4px solid #ccc;
     transition: all 0.2s;
