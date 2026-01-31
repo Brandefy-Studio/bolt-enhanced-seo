@@ -33,12 +33,9 @@ class SeoAnalyzer {
     }
     
     checkKeywordsEnabled() {
-        // Check if keywords field has maxlength > 0
+        // Check if keywords field exists (field is only rendered if keywords_length > 0)
         const keywordsInput = document.querySelector('#seofields-keywords');
-        if (!keywordsInput) return false;
-        
-        const maxLength = keywordsInput.getAttribute('maxlength');
-        return maxLength && parseInt(maxLength) > 0;
+        return keywordsInput !== null;
     }
 
     analyze(data) {
