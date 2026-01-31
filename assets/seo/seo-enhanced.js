@@ -1,11 +1,10 @@
 /**
- * Enhanced SEO Field Controller with Inline Real-time Analysis
- * v1.1.1 - Improved UX with inline indicators and progress bar
+ * Enhanced SEO Field Controller with Real-time Analysis
+ * v1.1.0
  */
 
 class SeoSnippet {
     constructor(container) {
-        console.log('[SEO Analyzer] Initializing v1.1.1...');
         this.container = container;
         this.analyzer = new SeoAnalyzer();
         
@@ -25,11 +24,11 @@ class SeoSnippet {
         this.inputs = {
             title: document.querySelector(`[name="${this.container.dataset.fieldTitle}"]`),
             slug: document.querySelector(`[name="${this.container.dataset.fieldSlug}"]`),
-            description: document.querySelector(`[name="${this.container.dataset.fieldDescription}"]`)
+            description: document.querySelector(`[name="${this.container.dataset.fieldDescription}"]`),
+            content: document.querySelector(`[name="${this.container.dataset.fieldContent}"]`) ||
+                    document.querySelector('[name="fields[body]"]') ||
+                    document.querySelector('textarea[name*="body"]')
         };
-
-        // Find all content fields
-        this.contentFields = this.findContentFields();
 
         this.seoFieldsInputs = {
             title: document.querySelector('#seofields-title'),
@@ -48,77 +47,6 @@ class SeoSnippet {
         this.init();
         this.initEvents();
         this.initAnalysis();
-    }
-
-    findContentFields() {
-        const fieldSet = new Set(); // Use Set to prevent duplicates
-        
-        // Find all textarea, redactor, and article fields (exclude SEO fields)
-        const selectors = [
-            'textarea[name*="[body]"]',
-            'textarea[name*="[content]"]',
-            'textarea[name*="[text]"]',
-            '[data-redactor]',
-            'input[type="text"][name*="[body]"]'
-        ];
-
-        selectors.forEach(selector => {
-            try {
-                document.querySelectorAll(selector).forEach(field => {
-                    // Exclude SEO fields
-                    if (!field.name || (!field.name.includes('[seo]') && !field.id.includes('seofields'))) {
-                        fieldSet.add(field); // Set automatically prevents duplicates
-                    }
-                });
-            } catch(e) {
-                // Selector not supported, skip
-            }
-        });
-
-        // Check for CKEditor instances (these won't duplicate with DOM elements)
-        if (typeof CKEDITOR !== 'undefined') {
-            for (let instance in CKEDITOR.instances) {
-                const editor = CKEDITOR.instances[instance];
-                // Skip if it's an SEO field
-                if (!instance.includes('seofields')) {
-                    fieldSet.add({
-                        type: 'ckeditor',
-                        instance: editor,
-                        getValue: () => editor.getData(),
-                        addEventListener: (event, callback) => editor.on(event, callback)
-                    });
-                }
-            }
-        }
-
-        const fieldsArray = Array.from(fieldSet);
-        console.log('[SEO Analyzer] Found', fieldsArray.length, 'unique content field(s)');
-        fieldsArray.forEach((field, index) => {
-            const name = field.name || field.instance?.name || field.type || 'unknown';
-            console.log(`  Field ${index + 1}:`, name);
-        });
-        
-        return fieldsArray; // Convert Set back to Array
-    }
-
-    getContentFromFields() {
-        let content = '';
-        
-        this.contentFields.forEach(field => {
-            try {
-                if (field.getValue) {
-                    content += ' ' + field.getValue();
-                } else if (field.value) {
-                    content += ' ' + field.value;
-                } else if (field.innerHTML) {
-                    content += ' ' + field.innerHTML;
-                }
-            } catch(e) {
-                // Field not accessible
-            }
-        });
-
-        return content;
     }
 
     init() {
@@ -144,17 +72,11 @@ class SeoSnippet {
     initEvents() {
         // Content field events
         if (this.inputs.title) {
-            this.inputs.title.addEventListener('keyup', () => {
-                this.changeTarget('title');
-                this.runAnalysis();
-            });
+            this.inputs.title.addEventListener('keyup', () => this.changeTarget('title'));
         }
 
         if (this.inputs.description) {
-            this.inputs.description.addEventListener('keyup', () => {
-                this.changeTarget('description');
-                this.runAnalysis();
-            });
+            this.inputs.description.addEventListener('keyup', () => this.changeTarget('description'));
         }
 
         if (this.inputs.slug) {
@@ -167,17 +89,9 @@ class SeoSnippet {
             });
         }
 
-        // Listen to content fields
-        this.contentFields.forEach(field => {
-            if (field.addEventListener) {
-                if (field.type === 'ckeditor') {
-                    field.addEventListener('change', () => this.runAnalysis());
-                } else {
-                    field.addEventListener('keyup', () => this.runAnalysis());
-                    field.addEventListener('change', () => this.runAnalysis());
-                }
-            }
-        });
+        if (this.inputs.content) {
+            this.inputs.content.addEventListener('keyup', () => this.runAnalysis());
+        }
 
         // SEO field events
         Object.keys(this.seoFieldsInputs).forEach((key) => {
@@ -185,7 +99,7 @@ class SeoSnippet {
             if (!input) return;
 
             let eventName = 'keyup';
-            if (key === 'robots' || key === 'og') {
+            if (key === 'robots') {
                 eventName = 'change';
             }
 
@@ -197,115 +111,47 @@ class SeoSnippet {
     }
 
     initAnalysis() {
-        // Create progress bar at top
-        this.createProgressBar();
-        
-        // Create inline indicators
-        this.createInlineIndicators();
+        // Create analysis UI
+        this.createAnalysisUI();
         
         // Run initial analysis
-        setTimeout(() => this.runAnalysis(), 500);
+        this.runAnalysis();
         
-        // Auto-run analysis every 3 seconds
-        setInterval(() => this.runAnalysis(), 3000);
+        // Auto-run analysis every 2 seconds if content changed
+        setInterval(() => this.runAnalysis(), 2000);
     }
 
-    createProgressBar() {
-        console.log('[SEO Analyzer] Creating progress bar...');
-        
-        // Find the form-set-fields container (more flexible approach)
-        let seoFieldSet = this.container.closest('.form-set-fields');
-        
-        // Fallback: try to find it by looking for the parent of seo fields
-        if (!seoFieldSet) {
-            const titleInput = document.querySelector('#seofields-title');
-            if (titleInput) {
-                seoFieldSet = titleInput.closest('.form-set-fields');
-            }
-        }
-        
-        // Another fallback: find any form-set-fields that contains our snippet
-        if (!seoFieldSet) {
-            seoFieldSet = this.container.closest('.form-set')?.querySelector('.form-set-fields');
-        }
-        
-        if (!seoFieldSet) {
-            console.error('[SEO Analyzer] Could not find form-set-fields container');
-            return;
-        }
-        console.log('[SEO Analyzer] Found form-set-fields, inserting progress bar');
+    createAnalysisUI() {
+        const analysisContainer = document.getElementById('seo-analysis-container');
+        if (!analysisContainer) return;
 
-        const progressBar = document.createElement('div');
-        progressBar.className = 'seo-progress-wrapper';
-        progressBar.innerHTML = `
-            <div class="seo-progress-header">
-                <span class="seo-progress-label">SEO Score</span>
-                <span class="seo-progress-score" id="seo-progress-score">0/100</span>
+        analysisContainer.innerHTML = `
+            <div class="seo-score-panel">
+                <div class="seo-score-circle">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                        <circle id="seo-score-progress" cx="60" cy="60" r="54" fill="none" 
+                                stroke="#4caf50" stroke-width="8" 
+                                stroke-dasharray="339.292" stroke-dashoffset="339.292"
+                                transform="rotate(-90 60 60)" 
+                                style="transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease"/>
+                        <text id="seo-score-text" x="60" y="68" text-anchor="middle" 
+                              font-size="32" font-weight="bold" fill="#333">0</text>
+                    </svg>
+                </div>
+                <div class="seo-score-label">SEO Score</div>
             </div>
-            <div class="seo-progress-bar">
-                <div class="seo-progress-fill" id="seo-progress-fill" style="width: 0%"></div>
+            
+            <div class="seo-checks-panel">
+                <h4>SEO Analysis</h4>
+                <div id="seo-checks-list" class="seo-checks-list"></div>
             </div>
-            <div class="seo-progress-status" id="seo-progress-status">Start optimizing your content...</div>
+            
+            <div class="seo-feedback-panel" id="seo-feedback-panel" style="display:none;">
+                <h4>Improvements</h4>
+                <div id="seo-feedback-list" class="seo-feedback-list"></div>
+            </div>
         `;
-        
-        seoFieldSet.insertBefore(progressBar, seoFieldSet.firstChild);
-    }
-
-    createInlineIndicators() {
-        console.log('[SEO Analyzer] Creating inline indicators...');
-        
-        // Title indicator - find by input ID
-        const titleInput = document.querySelector('#seofields-title');
-        if (titleInput) {
-            const titleHelper = titleInput.closest('.form-group')?.querySelector('.form--helper');
-            if (titleHelper && !titleHelper.querySelector('#seo-title-indicator')) {
-                const indicator = document.createElement('div');
-                indicator.id = 'seo-title-indicator';
-                indicator.className = 'seo-inline-indicator';
-                titleHelper.appendChild(indicator);
-                console.log('[SEO Analyzer] Title indicator added');
-            }
-        }
-
-        // Description indicator
-        const descInput = document.querySelector('#seofields-description');
-        if (descInput) {
-            const descHelper = descInput.closest('.form-group')?.querySelector('.form--helper');
-            if (descHelper && !descHelper.querySelector('#seo-description-indicator')) {
-                const indicator = document.createElement('div');
-                indicator.id = 'seo-description-indicator';
-                indicator.className = 'seo-inline-indicator';
-                descHelper.appendChild(indicator);
-                console.log('[SEO Analyzer] Description indicator added');
-            }
-        }
-
-        // Keyphrase indicator
-        const keyphraseInput = document.querySelector('#seofields-keyphrase');
-        if (keyphraseInput) {
-            const keyphraseHelper = keyphraseInput.closest('.form-group')?.querySelector('.form--helper');
-            if (keyphraseHelper && !keyphraseHelper.querySelector('#seo-keyphrase-indicator')) {
-                const indicator = document.createElement('div');
-                indicator.id = 'seo-keyphrase-indicator';
-                indicator.className = 'seo-inline-indicator';
-                keyphraseHelper.appendChild(indicator);
-                console.log('[SEO Analyzer] Keyphrase indicator added');
-            }
-        }
-
-        // Content analysis section (after snippet)
-        const snippetField = this.container.closest('.form-group');
-        if (snippetField && !document.querySelector('#seo-content-analysis')) {
-            const contentAnalysis = document.createElement('div');
-            contentAnalysis.id = 'seo-content-analysis';
-            contentAnalysis.className = 'seo-content-analysis';
-            contentAnalysis.innerHTML = `
-                <h4 class="seo-section-title">Content Analysis</h4>
-                <div id="seo-content-checks" class="seo-content-checks"></div>
-            `;
-            snippetField.parentNode.insertBefore(contentAnalysis, snippetField.nextSibling);
-            console.log('[SEO Analyzer] Content analysis section added');
-        }
     }
 
     runAnalysis() {
@@ -313,8 +159,9 @@ class SeoSnippet {
             title: this.seoFieldsInputs.title?.value || this.inputs.title?.value || '',
             description: this.seoFieldsInputs.description?.value || this.inputs.description?.value || '',
             keyphrase: this.seoFieldsInputs.keyphrase?.value || '',
+            keywords: this.seoFieldsInputs.keywords?.value || '',
             slug: this.inputs.slug?.value || '',
-            content: this.getContentFromFields()
+            content: this.inputs.content?.value || ''
         };
 
         const results = this.analyzer.analyze(data);
@@ -322,123 +169,73 @@ class SeoSnippet {
     }
 
     updateAnalysisUI(results) {
-        this.updateProgressBar(results.score);
-        this.updateTitleIndicator(results.checks.titleLength, results.checks.keyphraseInTitle);
-        this.updateDescriptionIndicator(results.checks.descriptionLength, results.checks.keyphraseInDescription);
-        this.updateKeyphraseIndicator(results.checks);
-        this.updateContentAnalysis(results.checks);
-    }
-
-    updateProgressBar(score) {
-        const fill = document.getElementById('seo-progress-fill');
-        const scoreText = document.getElementById('seo-progress-score');
-        const status = document.getElementById('seo-progress-status');
+        // Update score circle
+        const scoreCircle = document.getElementById('seo-score-progress');
+        const scoreText = document.getElementById('seo-score-text');
         
-        if (!fill) return;
-
-        fill.style.width = score + '%';
-        scoreText.textContent = score + '/100';
-        
-        fill.className = 'seo-progress-fill';
-        if (score >= 80) {
-            fill.classList.add('seo-excellent');
-            status.textContent = '✓ Excellent SEO optimization!';
-            status.className = 'seo-progress-status seo-status-good';
-        } else if (score >= 60) {
-            fill.classList.add('seo-good');
-            status.textContent = '⚠ Good, but can be improved';
-            status.className = 'seo-progress-status seo-status-warning';
-        } else if (score >= 40) {
-            fill.classList.add('seo-fair');
-            status.textContent = '⚠ Needs improvement';
-            status.className = 'seo-progress-status seo-status-warning';
-        } else {
-            fill.classList.add('seo-poor');
-            status.textContent = '✗ Significant improvements needed';
-            status.className = 'seo-progress-status seo-status-bad';
+        if (scoreCircle && scoreText) {
+            const circumference = 339.292;
+            const offset = circumference - (results.score / 100) * circumference;
+            scoreCircle.style.strokeDashoffset = offset;
+            
+            // Color based on score
+            if (results.score >= 80) {
+                scoreCircle.style.stroke = '#4caf50'; // Green
+            } else if (results.score >= 50) {
+                scoreCircle.style.stroke = '#ff9800'; // Orange
+            } else {
+                scoreCircle.style.stroke = '#f44336'; // Red
+            }
+            
+            scoreText.textContent = results.score;
         }
-    }
 
-    updateTitleIndicator(lengthCheck, keyphraseCheck) {
-        const indicator = document.getElementById('seo-title-indicator');
-        if (!indicator) return;
-
-        const length = lengthCheck.value;
-        const hasKeyphrase = keyphraseCheck.value;
-        
-        let html = `<div class="seo-check-inline">`;
-        html += `<span class="seo-badge seo-badge-${lengthCheck.status}">${length} chars</span>`;
-        if (hasKeyphrase) {
-            html += `<span class="seo-badge seo-badge-good">✓ Keyphrase</span>`;
-        } else if (keyphraseCheck.status !== 'neutral') {
-            html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
+        // Update checks list
+        const checksList = document.getElementById('seo-checks-list');
+        if (checksList) {
+            checksList.innerHTML = '';
+            
+            Object.keys(results.checks).forEach(checkName => {
+                const check = results.checks[checkName];
+                const checkItem = document.createElement('div');
+                checkItem.className = `seo-check-item seo-check-${check.status}`;
+                
+                let icon = '✓';
+                if (check.status === 'bad') icon = '✗';
+                else if (check.status === 'warning') icon = '!';
+                else if (check.status === 'neutral') icon = '○';
+                
+                checkItem.innerHTML = `
+                    <span class="seo-check-icon">${icon}</span>
+                    <span class="seo-check-name">${this.analyzer.checks[checkName].name}</span>
+                    <span class="seo-check-message">${check.message}</span>
+                `;
+                
+                checksList.appendChild(checkItem);
+            });
         }
-        html += `</div>`;
-        indicator.innerHTML = html;
-    }
 
-    updateDescriptionIndicator(lengthCheck, keyphraseCheck) {
-        const indicator = document.getElementById('seo-description-indicator');
-        if (!indicator) return;
-
-        const length = lengthCheck.value;
-        const hasKeyphrase = keyphraseCheck.value;
+        // Update feedback
+        const feedbackPanel = document.getElementById('seo-feedback-panel');
+        const feedbackList = document.getElementById('seo-feedback-list');
         
-        let html = `<div class="seo-check-inline">`;
-        html += `<span class="seo-badge seo-badge-${lengthCheck.status}">${length} chars</span>`;
-        if (hasKeyphrase) {
-            html += `<span class="seo-badge seo-badge-good">✓ Keyphrase</span>`;
-        } else if (keyphraseCheck.status !== 'neutral') {
-            html += `<span class="seo-badge seo-badge-bad">✗ Keyphrase</span>`;
+        if (feedbackList && feedbackPanel) {
+            if (results.feedback.length > 0) {
+                feedbackPanel.style.display = 'block';
+                feedbackList.innerHTML = '';
+                
+                results.feedback.forEach(item => {
+                    const feedbackItem = document.createElement('div');
+                    feedbackItem.className = `seo-feedback-item seo-feedback-${item.type}`;
+                    feedbackItem.innerHTML = `
+                        <strong>${item.check}:</strong> ${item.message}
+                    `;
+                    feedbackList.appendChild(feedbackItem);
+                });
+            } else {
+                feedbackPanel.style.display = 'none';
+            }
         }
-        html += `</div>`;
-        indicator.innerHTML = html;
-    }
-
-    updateKeyphraseIndicator(checks) {
-        const indicator = document.getElementById('seo-keyphrase-indicator');
-        if (!indicator) return;
-
-        const inTitle = checks.keyphraseInTitle.value;
-        const inDesc = checks.keyphraseInDescription.value;
-        const inUrl = checks.keyphraseInSlug.value;
-        const inContent = checks.keyphraseInContent.value > 0;
-        
-        let html = `<div class="seo-check-inline"><span class="seo-badge-label">Used in:</span>`;
-        html += `<span class="seo-badge ${inTitle ? 'seo-badge-good' : 'seo-badge-bad'}">${inTitle ? '✓' : '✗'} Title</span>`;
-        html += `<span class="seo-badge ${inDesc ? 'seo-badge-good' : 'seo-badge-bad'}">${inDesc ? '✓' : '✗'} Description</span>`;
-        html += `<span class="seo-badge ${inUrl ? 'seo-badge-good' : 'seo-badge-warning'}">${inUrl ? '✓' : '⚠'} URL</span>`;
-        html += `<span class="seo-badge ${inContent ? 'seo-badge-good' : 'seo-badge-bad'}">${inContent ? '✓' : '✗'} Content</span>`;
-        html += `</div>`;
-        
-        indicator.innerHTML = html;
-    }
-
-    updateContentAnalysis(checks) {
-        const container = document.getElementById('seo-content-checks');
-        if (!container) return;
-
-        let html = '<div class="seo-checks-grid">';
-        
-        html += this.createCheckCard('Content Length', checks.contentLength.message, checks.contentLength.status, '📝');
-        html += this.createCheckCard('Keyphrase Density', checks.keyphraseDensity.message, checks.keyphraseDensity.status, '🎯');
-        html += this.createCheckCard('Internal Links', checks.internalLinks.message, checks.internalLinks.status, '🔗');
-        html += this.createCheckCard('External Links', checks.externalLinks.message, checks.externalLinks.status, '🌐');
-        
-        html += '</div>';
-        container.innerHTML = html;
-    }
-
-    createCheckCard(title, message, status, icon) {
-        return `
-            <div class="seo-check-card seo-check-${status}">
-                <span class="seo-check-icon">${icon}</span>
-                <div class="seo-check-content">
-                    <div class="seo-check-title">${title}</div>
-                    <div class="seo-check-message">${message}</div>
-                </div>
-            </div>
-        `;
     }
 
     changeTarget(field) {
@@ -469,36 +266,9 @@ class SeoSnippet {
     }
 }
 
-// Initialize immediately if DOM is ready, or wait for it
-function initSeoSnippet() {
+document.addEventListener("DOMContentLoaded", () => {
     const seoSnippet = document.querySelector('.seo_snippet');
-    if (seoSnippet && !seoSnippet.dataset.seoInitialized) {
-        seoSnippet.dataset.seoInitialized = 'true';
+    if (seoSnippet) {
         new SeoSnippet(seoSnippet);
     }
-}
-
-// Try multiple initialization methods for Bolt's dynamic loading
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSeoSnippet);
-} else {
-    // DOM already loaded, init immediately
-    initSeoSnippet();
-}
-
-// Also listen for Turbo navigation (Bolt uses Turbo)
-document.addEventListener('turbo:load', initSeoSnippet);
-document.addEventListener('turbo:render', initSeoSnippet);
-
-// Fallback: Check periodically for 5 seconds
-let attempts = 0;
-const checkInterval = setInterval(() => {
-    if (attempts++ > 50) {
-        clearInterval(checkInterval);
-        return;
-    }
-    if (document.querySelector('.seo_snippet') && !document.querySelector('.seo_snippet').dataset.seoInitialized) {
-        initSeoSnippet();
-        clearInterval(checkInterval);
-    }
-}, 100);
+});

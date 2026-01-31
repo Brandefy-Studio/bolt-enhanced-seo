@@ -10,6 +10,7 @@ class SeoAnalyzer {
             keyphraseInTitle: { weight: 15, name: 'Keyphrase in Title' },
             keyphraseInDescription: { weight: 10, name: 'Keyphrase in Description' },
             keyphraseInSlug: { weight: 10, name: 'Keyphrase in URL' },
+            keywords: { weight: 5, name: 'Keywords', conditional: true },
             keyphraseInContent: { weight: 8, name: 'Keyphrase in Content' },
             keyphraseDensity: { weight: 8, name: 'Keyphrase Density' },
             contentLength: { weight: 10, name: 'Content Length' },
@@ -20,11 +21,24 @@ class SeoAnalyzer {
         this.thresholds = {
             title: { min: 30, max: 60, optimal: 50 },
             description: { min: 120, max: 160, optimal: 140 },
+            keywords: { min: 3, optimal: 5, max: 10 },
             keyphraseDensity: { min: 0.5, max: 2.5, optimal: 1.5 },
             contentLength: { min: 300, optimal: 800 },
             externalLinks: { min: 1, optimal: 3 },
             internalLinks: { min: 2, optimal: 5 }
         };
+        
+        // Check if keywords field is enabled by checking max length in field
+        this.keywordsEnabled = this.checkKeywordsEnabled();
+    }
+    
+    checkKeywordsEnabled() {
+        // Check if keywords field has maxlength > 0
+        const keywordsInput = document.querySelector('#seofields-keywords');
+        if (!keywordsInput) return false;
+        
+        const maxLength = keywordsInput.getAttribute('maxlength');
+        return maxLength && parseInt(maxLength) > 0;
     }
 
     analyze(data) {
@@ -39,6 +53,12 @@ class SeoAnalyzer {
         results.checks.keyphraseInTitle = this.checkKeyphraseInTitle(data.title, data.keyphrase);
         results.checks.keyphraseInDescription = this.checkKeyphraseInDescription(data.description, data.keyphrase);
         results.checks.keyphraseInSlug = this.checkKeyphraseInSlug(data.slug, data.keyphrase);
+        
+        // Only check keywords if field is enabled (maxlength > 0)
+        if (this.keywordsEnabled) {
+            results.checks.keywords = this.checkKeywords(data.keywords);
+        }
+        
         results.checks.keyphraseInContent = this.checkKeyphraseInContent(data.content, data.keyphrase);
         results.checks.keyphraseDensity = this.checkKeyphraseDensity(data.content, data.keyphrase);
         results.checks.contentLength = this.checkContentLength(data.content);
@@ -46,13 +66,17 @@ class SeoAnalyzer {
         results.checks.internalLinks = this.checkInternalLinks(data.content);
 
         let earnedScore = 0;
+        let totalWeight = 0;
+        
         Object.keys(results.checks).forEach(checkName => {
             const check = results.checks[checkName];
             const weight = this.checks[checkName].weight;
+            totalWeight += weight;
             earnedScore += (check.score / 100) * weight;
         });
 
-        results.score = Math.round(earnedScore);
+        // Normalize score to 100 (in case keywords is disabled, weights don't add to 100)
+        results.score = Math.round((earnedScore / totalWeight) * 100);
         results.feedback = this.generateFeedback(results.checks);
 
         return results;
@@ -114,6 +138,60 @@ class SeoAnalyzer {
                 status: 'good',
                 message: `Description length perfect (${length} chars)`,
                 value: length
+            };
+        }
+    }
+
+    checkKeywords(keywords) {
+        if (!keywords || !keywords.trim()) {
+            return { 
+                score: 40, 
+                status: 'warning', 
+                message: 'No keywords specified', 
+                value: 0 
+            };
+        }
+        
+        // Split by comma and count
+        const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        const count = keywordList.length;
+        
+        const { min, optimal, max } = this.thresholds.keywords;
+        
+        if (count === 0) {
+            return { 
+                score: 40, 
+                status: 'warning', 
+                message: 'No keywords added', 
+                value: 0 
+            };
+        } else if (count < min) {
+            return { 
+                score: 60, 
+                status: 'warning', 
+                message: `Only ${count} keyword(s) - add more`, 
+                value: count 
+            };
+        } else if (count >= optimal && count <= max) {
+            return { 
+                score: 100, 
+                status: 'good', 
+                message: `${count} keyword(s) (optimal)`, 
+                value: count 
+            };
+        } else if (count > max) {
+            return { 
+                score: 70, 
+                status: 'warning', 
+                message: `${count} keywords - may be too many`, 
+                value: count 
+            };
+        } else {
+            return { 
+                score: 85, 
+                status: 'good', 
+                message: `${count} keyword(s)`, 
+                value: count 
             };
         }
     }
@@ -245,8 +323,7 @@ class SeoAnalyzer {
 
     checkExternalLinks(content) {
         const links = this.extractLinks(content);
-        // Filter: only links where isExternalLink returns true (excluding null)
-        const externalLinks = links.filter(link => this.isExternalLink(link) === true);
+        const externalLinks = links.filter(link => this.isExternalLink(link));
         const count = externalLinks.length;
         
         if (count === 0) {
@@ -260,8 +337,7 @@ class SeoAnalyzer {
 
     checkInternalLinks(content) {
         const links = this.extractLinks(content);
-        // Filter: only links where isExternalLink returns false (excluding null for anchors)
-        const internalLinks = links.filter(link => this.isExternalLink(link) === false);
+        const internalLinks = links.filter(link => !this.isExternalLink(link));
         const count = internalLinks.length;
         
         if (count === 0) {
@@ -300,51 +376,17 @@ class SeoAnalyzer {
         const div = document.createElement('div');
         div.innerHTML = html;
         const anchors = div.querySelectorAll('a[href]');
-        return Array.from(anchors).map(a => {
-            const href = a.getAttribute('href');
-            // Return both href and full URL for better analysis
-            return {
-                href: href,
-                fullUrl: this.resolveUrl(href)
-            };
-        });
+        return Array.from(anchors).map(a => a.getAttribute('href'));
     }
 
-    resolveUrl(href) {
-        // Resolve relative URLs to absolute URLs
-        try {
-            return new URL(href, window.location.origin).href;
-        } catch (e) {
-            return href;
-        }
-    }
-
-    isExternalLink(linkObj) {
-        const href = linkObj.href;
-        const fullUrl = linkObj.fullUrl;
-        
-        // Skip anchors, javascript, mailto, tel, etc.
-        if (!href || 
-            href.startsWith('#') || 
-            href.startsWith('javascript:') ||
-            href.startsWith('mailto:') ||
-            href.startsWith('tel:') ||
-            href.startsWith('sms:')) {
-            return null; // Not counted as either internal or external
-        }
+    isExternalLink(href) {
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) return false;
+        if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) return false;
         
         try {
-            const url = new URL(fullUrl);
-            const currentHostname = window.location.hostname;
-            
-            // Compare hostnames (ignoring www)
-            const urlHost = url.hostname.replace(/^www\./, '');
-            const currentHost = currentHostname.replace(/^www\./, '');
-            
-            // External if different hostname
-            return urlHost !== currentHost;
+            const url = new URL(href, window.location.origin);
+            return url.hostname !== window.location.hostname;
         } catch (e) {
-            // If URL parsing fails, treat as internal (relative link)
             return false;
         }
     }
