@@ -373,7 +373,7 @@ Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/a
 
 ## Roadmap
 
-### v1.1.0 (Complete)
+### v1.1.0 (Planned)
 - Real-time SEO score analysis
 - Character count indicators with color coding
 - Content length recommendations
@@ -416,7 +416,7 @@ Contributions are welcome! Please:
 
 ## Credits
 
-- **Original Extension**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
+- **Forked From**: [AppoloDev/bolt-seo](https://github.com/AppoloDev/bolt-seo)
 - **Enhanced By**: Brandefy Creative Studio
 - **Bolt CMS**: [boltcms.io](https://boltcms.io)
 
@@ -432,4 +432,4 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-Made with ❤️ by [Brandefy Studio](https://brandefycreative.com)
+Made with ❤️ by [Brandefy Creative Studio](https://brandefycreative.com)

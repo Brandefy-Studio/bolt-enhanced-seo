@@ -1,5 +1,5 @@
 /**
- * Real-time SEO Analyzer for Bolt Enhanced SEO v1.1.0
+ * Real-time SEO Analyzer for Bolt Enhanced SEO v1.1.2
  */
 
 class SeoAnalyzer {
@@ -21,7 +21,7 @@ class SeoAnalyzer {
         this.thresholds = {
             title: { min: 30, max: 60, optimal: 50 },
             description: { min: 120, max: 160, optimal: 140 },
-            keywords: { min: 3, optimal: 5, max: 10 },
+            keywords: { min: 3, optimal: 7, max: 15 },
             keyphraseDensity: { min: 0.5, max: 2.5, optimal: 1.5 },
             contentLength: { min: 300, optimal: 800 },
             externalLinks: { min: 1, optimal: 3 },
@@ -323,7 +323,8 @@ class SeoAnalyzer {
 
     checkExternalLinks(content) {
         const links = this.extractLinks(content);
-        const externalLinks = links.filter(link => this.isExternalLink(link));
+        // Filter: only links where isExternalLink returns true (excluding null)
+        const externalLinks = links.filter(link => this.isExternalLink(link) === true);
         const count = externalLinks.length;
         
         if (count === 0) {
@@ -337,7 +338,8 @@ class SeoAnalyzer {
 
     checkInternalLinks(content) {
         const links = this.extractLinks(content);
-        const internalLinks = links.filter(link => !this.isExternalLink(link));
+        // Filter: only links where isExternalLink returns false (excluding null for anchors)
+        const internalLinks = links.filter(link => this.isExternalLink(link) === false);
         const count = internalLinks.length;
         
         if (count === 0) {
@@ -376,17 +378,51 @@ class SeoAnalyzer {
         const div = document.createElement('div');
         div.innerHTML = html;
         const anchors = div.querySelectorAll('a[href]');
-        return Array.from(anchors).map(a => a.getAttribute('href'));
+        return Array.from(anchors).map(a => {
+            const href = a.getAttribute('href');
+            // Return both href and full URL for better analysis
+            return {
+                href: href,
+                fullUrl: this.resolveUrl(href)
+            };
+        });
     }
 
-    isExternalLink(href) {
-        if (!href || href.startsWith('#') || href.startsWith('javascript:')) return false;
-        if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) return false;
+    resolveUrl(href) {
+        // Resolve relative URLs to absolute URLs
+        try {
+            return new URL(href, window.location.origin).href;
+        } catch (e) {
+            return href;
+        }
+    }
+
+    isExternalLink(linkObj) {
+        const href = linkObj.href;
+        const fullUrl = linkObj.fullUrl;
+        
+        // Skip anchors, javascript, mailto, tel, etc.
+        if (!href || 
+            href.startsWith('#') || 
+            href.startsWith('javascript:') ||
+            href.startsWith('mailto:') ||
+            href.startsWith('tel:') ||
+            href.startsWith('sms:')) {
+            return null; // Not counted as either internal or external
+        }
         
         try {
-            const url = new URL(href, window.location.origin);
-            return url.hostname !== window.location.hostname;
+            const url = new URL(fullUrl);
+            const currentHostname = window.location.hostname;
+            
+            // Compare hostnames (ignoring www)
+            const urlHost = url.hostname.replace(/^www\./, '');
+            const currentHost = currentHostname.replace(/^www\./, '');
+            
+            // External if different hostname
+            return urlHost !== currentHost;
         } catch (e) {
+            // If URL parsing fails, treat as internal (relative link)
             return false;
         }
     }
