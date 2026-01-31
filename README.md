@@ -373,7 +373,7 @@ Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/a
 
 ## Roadmap
 
-### v1.1.0 (Planned)
+### v1.1.0 (Released)
 - Real-time SEO score analysis
 - Character count indicators with color coding
 - Content length recommendations
