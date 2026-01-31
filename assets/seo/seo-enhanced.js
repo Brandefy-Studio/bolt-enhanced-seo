@@ -332,10 +332,10 @@ class SeoSnippet {
 
     runAnalysis() {
         const data = {
-            title: this.seoFieldsInputs.title?.value || this.inputs.title?.value || '',
-            description: this.seoFieldsInputs.description?.value || this.inputs.description?.value || '',
-            keyphrase: this.seoFieldsInputs.keyphrase?.value || '',
-            keywords: this.seoFieldsInputs.keywords?.value || '',
+            title: (this.seoFieldsInputs.title?.value || this.inputs.title?.value || '').trim(),
+            description: (this.seoFieldsInputs.description?.value || this.inputs.description?.value || '').trim(),
+            keyphrase: (this.seoFieldsInputs.keyphrase?.value || '').trim(),
+            keywords: (this.seoFieldsInputs.keywords?.value || '').trim(),
             slug: this.inputs.slug?.value || '',
             content: this.getContentFromFields()
         };
@@ -529,7 +529,7 @@ class SeoSnippet {
         }
 
         if (this.seoFieldsInputs[field]) {
-            this.seoData[field] = this.seoFieldsInputs[field].value;
+            this.seoData[field] = this.seoFieldsInputs[field].value.trim();
             this.seoField.value = JSON.stringify(this.seoData);
         }
     }
