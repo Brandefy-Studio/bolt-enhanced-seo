@@ -432,9 +432,25 @@ class SeoSnippet {
         const status = keywordsCheck.status;
         const message = keywordsCheck.message;
         
+        // Get character count and limit
+        const keywordsInput = document.querySelector('#seofields-keywords');
+        const charCount = keywordsInput ? keywordsInput.value.length : 0;
+        const charLimit = keywordsInput ? parseInt(keywordsInput.getAttribute('data-max-length')) || 255 : 255;
+        
+        // Determine character count status
+        let charStatus = 'good';
+        if (charCount === 0) {
+            charStatus = 'neutral';
+        } else if (charCount > charLimit) {
+            charStatus = 'bad';
+        } else if (charCount > charLimit * 0.9) {
+            charStatus = 'warning';
+        }
+        
         let html = `<div class="seo-check-inline">`;
         html += `<span class="seo-badge-label">Keywords:</span>`;
         html += `<span class="seo-badge seo-badge-${status}">${count} keyword(s)</span>`;
+        html += `<span class="seo-badge seo-badge-${charStatus}">${charCount}/${charLimit} chars</span>`;
         
         // Add status message if not optimal
         if (status !== 'good') {
