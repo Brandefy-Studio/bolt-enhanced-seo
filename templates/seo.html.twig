@@ -99,9 +99,7 @@
                         id="seofields-keywords"
                         data-max-length="{{ keywords_length }}"
                         style="height: 80px;"
-                >
-                    {{ seovalues.keywords|default('') }}
-                </textarea>
+                >{{ seovalues.keywords|default('') }}</textarea>
             </div>
 
             <div id="field-{{ name }}-keywords_postfix" class="form--helper">
