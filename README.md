@@ -377,16 +377,15 @@ Or manually copy `vendor/brandefy-studio/bolt-enhanced-seo/assets/` to `public/a
 - Real-time SEO score analysis
 - Character count indicators with color coding
 - Content length recommendations
+- Focus keyphrase analysis
+- Enhanced Google SERP preview
 
 ### v1.2.0 (Planned)
 - Readability analysis (Flesch Reading Ease)
-- Focus keyphrase analysis
-- Enhanced Google SERP preview
 
 ### v2.0.0 (Future)
 - Schema.org markup generator
 - Redirect manager
-- Sitemap generator
 - Content insights dashboard
 
 ## Migration from AppoloDev/bolt-seo
